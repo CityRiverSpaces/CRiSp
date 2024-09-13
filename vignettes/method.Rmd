@@ -1,8 +1,8 @@
 ---
-title: "1. The method"
+title: "1. The method of delineation"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{1. The method}
+  %\VignetteIndexEntry{1. The method of delineation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-CRiSp implements a spatial morphological method of delineation ([Forgaci, 2018](https://doi.org/10.7480/abe.2018.31)) that considers both the terrain of the river valley and the urban fabric, as shown in the diagram below.
+CRiSp implements a spatial morphological method of delineation ([Forgaci, 2018](https://doi.org/10.7480/abe.2018.31)) that considers both the terrain of the river valley and the configuration of the urban fabric, as shown in the diagram below.
 
 ```{r fig.align='center', fig.alt='Diagram of the method of delineation', echo=FALSE}
 knitr::include_graphics("img/delineation.jpg")
@@ -22,8 +22,10 @@ knitr::include_graphics("img/delineation.jpg")
 
 The method consists of three steps, each explained on this website in a separate article:
 
-1. The **corridor boundary** of the urban area surrounding the river is delineated on the street network considering a given **walkshed** (the urban area reached along the street network within a given walking distance from the river, 500m by default) and the **valley edge** derived from a digital elevation model, as shown in `vignette("corridor-delineation")`.
-2. The delineated corridor is divided into **corridor segments** bounded by the main transversal streets, as shown in `vignette("corridor-segmentation")`.
+1. The **corridor boundary** of the urban area surrounding the river is delineated on the street network considering a given **walkshed** (the urban area reached along the street network within a given walking distance from the river, 500m by default) and the **valley edge** derived from a Digital Elevation Model, as shown in `vignette("corridor-delineation")`.  
+
+2. The delineated corridor is divided into **corridor segments** bounded by the main transversal streets, as shown in `vignette("corridor-segmentation")`.  
+
 3. The **river space**, i.e., the space between the river and the first line of buildings is determined, as shown in `vignette("riverspace-delineation")`.
 
 
