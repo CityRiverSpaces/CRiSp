@@ -14,7 +14,15 @@ define_aoi <- function(bb, crs, buffer_dist = 0) {
     sf::st_as_sfc() |>
     sf::st_transform(crs)
 
-  if (buffer_dist != 0) aoi <- sf::st_buffer(aoi, buffer_dist) else aoi
+  if (buffer_dist != 0) {
+    if (sf::st_is_longlat(aoi)) {
+      warning("The area of interest is in longlat coordinates. ",
+              "Consider using a projected CRS when buffering the AoI.")
+    }
+    aoi <- sf::st_buffer(aoi, buffer_dist)
+  } else {
+    aoi
+  }
 }
 
 #' Split the area of interest (AoI) by a river.
