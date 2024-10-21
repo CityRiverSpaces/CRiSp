@@ -38,7 +38,8 @@ st_crs(river_surface)$wkt <- gsub("°|º", "\\\u00b0",
 highway_values <- c("motorway", "primary", "secondary", "tertiary")
 streets <- osmdata_as_sf("highway", highway_values, bb)
 streets <- merge_streets(streets) |>
-  select("highway")
+  select("highway") |>
+  st_transform(epsg_code)
 st_crs(streets)$wkt <- gsub("°|º", "\\\u00b0", st_crs(streets)$wkt)
 
 railways <- osmdata_as_sf("railway", "rail", bbox_expanded)

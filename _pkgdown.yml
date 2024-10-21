@@ -10,6 +10,7 @@ articles:
   contents:
   - method
   - getting-osm-data
+  - network-preparation
   - corridor-delineation
   - corridor-segmentation
   - riverspace-delineation
@@ -22,13 +23,19 @@ navbar:
       menu:
         - text: 1. The method
           href: articles/method.html
+        - text: -------
+        - text: Preparation
         - text: 2. Getting OSM data for delineation
           href: articles/getting-osm-data.html
-        - text: 3. Corridor delineation
+        - text: 3. Preparing the network for delineation
+          href: articles/network-preparation.html
+        - text: -------
+        - text: Delineation
+        - text: 4. Corridor delineation
           href: articles/corridor-delineation.html
-        - text: 4. Corridor segmentation
+        - text: 5. Corridor segmentation
           href: articles/corridor-segmentation.html
-        - text: 5. Riverspace delineation
+        - text: 6. Riverspace delineation
           href: articles/riverspace-delineation.html
         - text: -------
         - text: Use cases

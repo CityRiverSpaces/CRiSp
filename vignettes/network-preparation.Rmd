@@ -1,0 +1,221 @@
+---
+title: "3. Preparing the network for delineation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{3. Preparing the network for delineation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, message=FALSE}
+library(CRiSp)
+library(here)
+library(dplyr)
+library(sf)
+library(sfnetworks)
+library(tidygraph)
+library(sfheaders)
+library(tibble)
+library(leaflet)
+```
+
+## 1. Input data
+
+In this article we show how to set up the spatial network for a city before using it for urban river corridor delineation. We work with OSM data for the city of Bucharest. 
+
+We start by loading the OSM data that we have previously downloaded in vignette("getting-osm-data"). According to the delineation method, all persistent physical structures need to be considered. Therefore, the network will contains both streets and railways from OSM.
+
+```{r}
+highways <- bucharest$streets
+railways <- bucharest$railways_lines
+```
+
+## Setting up the network
+
+We want to create a joint network that includes both railways and highways:
+
+```{r}
+network <- bind_rows(highways, railways) |>
+  as_sfnetwork(directed = FALSE)
+```
+
+**Note**: If the city in question contains other surface-level structures that need to be included in the network, such as above-ground metro lines, retrieve them with the appropriate OSM tags following the instructions in vignette("getting-osm-data") and include them here in the network.
+
+We want to flatten the two networks and add nodes at all intersections between edges. To that end, we first identify the unique intersections between edges:
+
+```{r}
+# Determine intersection points between crossing edges
+edges_cross <- network |>
+  activate("edges") |>
+  mutate(id = 1:n()) |>  # Add ID to ease replacement later on
+  filter(edge_crosses(.E())) |>
+  st_as_sf("edges")
+
+pts_intersect <- st_intersection(edges_cross) |>
+  # Cast multipoint intersections into points
+  st_collection_extract("POINT") |> sf_cast(to = "POINT")
+
+# Drop duplicates
+pts_intersect_agg <- aggregate(
+  pts_intersect,
+  by = st_geometry(pts_intersect),
+  FUN = unique,
+  drop = TRUE
+)
+pts_intersect_unique <- pts_intersect_agg |> distinct()
+```
+
+We then want to inject these points within the edge geometries (linestrings), so that we can then use `sfnetworks::to_spatial_subdivision` to raise them as network nodes. 
+
+**Note**: `sfnetworks::st_network_blend` cannot be used for this purpose, because this function only adds external points to one edge (the closest one).
+
+We define the functions that we use to inject points to the edge geometries:
+
+```{r}
+# Calculate Euclidean distance between (x1, y1) and (x2, y2)
+distance <- function(x1, y1, x2, y2){
+  sqrt((x2 - x1)^2 + (y2 - y1)^2)
+}
+
+# `edge_pts` data.frame with all the edge points from the network
+# `point` a point to be added to an edge
+# `line_id` the id of the edge which the point should be added to
+insert_intersection <- function(edge_pts, point, line_id) {
+  line_pts <- subset(edge_pts, linestring_id == line_id)
+  pt_x <- point[[1]]
+  pt_y <- point[[2]]
+  is_point_in_line <- nrow(subset(line_pts, x == pt_x &
+                                    y == pt_y)) >= 1
+  if (!is_point_in_line) {
+    startpoint <- subset(line_pts, is_startpoint == TRUE)
+    kk <- as.numeric(rownames(startpoint))
+    w_break <- FALSE
+    while (!w_break) {
+      # Consider the line segments a - b.
+      # x is a valid intersection if the following condition is true:
+      # distance(a, b) == distance(a, x) + distance(x, b)
+      pt_a_x <- edge_pts[kk, ]$x
+      pt_a_y <- edge_pts[kk, ]$y
+      pt_b_x <- edge_pts[kk + 1, ]$x
+      pt_b_y <- edge_pts[kk + 1, ]$y
+      
+      d_ab <- distance(pt_a_x, pt_a_y, pt_b_x, pt_b_y)
+      d_ax <- distance(pt_a_x, pt_a_y, pt_x, pt_y)
+      d_bx <- distance(pt_b_x, pt_b_y, pt_x, pt_y)
+      is_intersection <- near(d_ab, d_ax + d_bx, tol = 1.e-3)
+      if (is_intersection) {
+        insertion <- tibble_row(
+          sfg_id = line_id,
+          linestring_id = line_id,
+          x = pt_x,
+          y = pt_y,
+          is_startpoint = FALSE,
+          is_endpoint = FALSE
+        )
+        edge_pts <- add_row(edge_pts, insertion, .after = kk)
+        w_break <- TRUE
+      } else {
+        if (edge_pts[kk + 1, ]$is_endpoint) {
+          warning("point is not added to the edge df.")
+          w_break <- TRUE
+        }
+      }
+      kk <- kk + 1
+    }
+  }
+  edge_pts
+}
+```
+
+Such injection takes place in the following few steps:
+
+```{r}
+# Convert edge table to data.frame and add info on boundary points
+edge_pts <- sf_to_df(edges_cross)
+edge_idxs <- edge_pts$linestring_id
+edge_pts$is_startpoint <- !duplicated(edge_idxs)
+edge_pts$is_endpoint <- !duplicated(edge_idxs, fromLast = TRUE)
+
+# Loop over all points, add them to the edge table
+for (i in 1:nrow(pts_intersect_unique)){
+  point <- pts_intersect_unique$geometry[[i]]
+  intersecting_edges <- unique(unlist(pts_intersect_unique$origins[i]))
+  for (edge_id in intersecting_edges){
+    edge_pts <- insert_intersection(edge_pts, point, edge_id)
+  }
+}
+
+# Convert back edge table to sfc object
+edges_cross_new <- sfc_linestring(edge_pts, linestring_id = "id", x = "x", y = "y")
+st_crs(edges_cross_new) <- st_crs(edges_cross)
+
+# Update the network with the new edge geometries
+nodes <- network |> st_as_sf("nodes")
+edges <- network |> st_as_sf("edges")
+edges[edges_cross$id,] <- edges[edges_cross$id,] |> st_set_geometry(edges_cross_new)
+network_new <- sfnetwork(
+  nodes = nodes,
+  edges = edges,
+  directed = FALSE,
+  force = TRUE,  # skip checks
+)
+```
+
+## 3. Network cleaning
+
+We now perform standard cleaning tasks on the network:
+
+```{r}
+# Simplify the graph, removing loops and double-edge connections
+# https://luukvdmeer.github.io/sfnetworks/articles/sfn02_preprocess_clean.html#simplify-network
+simplify <- function(net){
+    net|>
+        activate("edges") |>
+        # reorder the edges so that the shortest is kept
+        arrange(edge_length()) |>
+        filter(!edge_is_multiple()) |>
+        filter(!edge_is_loop())
+}
+
+clean <- function(net){
+    net |>
+        # subdivide edges by adding missing nodes
+        # https://luukvdmeer.github.io/sfnetworks/articles/sfn02_preprocess_clean.html#subdivide-edges
+        convert(to_spatial_subdivision, .clean = TRUE) |>
+        # remove pseudo-nodes
+        # https://luukvdmeer.github.io/sfnetworks/articles/sfn02_preprocess_clean.html#smooth-pseudo-nodes
+        convert(to_spatial_smooth, .clean = TRUE) |>
+        # run simplification steps
+        simplify() |>
+        # keep only the main connected component of the network
+        activate("nodes") |>
+        filter(group_components() == 1)
+}
+
+network_cleaned <- clean(network_new)
+```
+
+## 4. Visualise cleaned network
+
+We define a utility function for visualization:
+
+```{r}
+# get geometry in lat/lon (WGS84)
+get_geom_latlon <- function(x) st_transform(x, 4326) |> st_geometry()
+```
+
+Visualize cleaned network:
+
+```{r}
+leaflet() |>
+    addTiles() |>
+    addPolylines(data = network_cleaned |> activate("edges") |> get_geom_latlon(), color = "black") |>
+    addCircles(data = network_cleaned |> activate("nodes") |> get_geom_latlon(), color = "red")
+```
