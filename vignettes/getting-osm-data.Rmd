@@ -101,8 +101,9 @@ Querying the Overpass API for the `highway` key, using the expanded bounding box
 ```{r}
 highways_value <- c("motorway", "trunk", "primary", "secondary", "tertiary")
 
-links_value <- sapply(X = highways_value,
+links_value <- vapply(X = highways_value,
                       FUN = \(x) sprintf("%s_link", x),
+                      FUN.VALUE = character(1),
                       USE.NAMES = FALSE)
 
 highways <- osmdata_as_sf("highway",

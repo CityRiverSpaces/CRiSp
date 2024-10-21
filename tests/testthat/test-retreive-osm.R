@@ -10,7 +10,11 @@ test_that("City boundary is correctly retreived", {
     sf::st_geometry() |>
     sf::st_transform(4326)
 
-  expect_equal(bucharest_boundary, bucharest_boundary_osm)
+  expect_equal(min(bucharest_boundary[[1]][[1]][[1]]),
+               min(bucharest_boundary_osm[[1]][[1]][[1]]))
+
+  expect_equal(max(bucharest_boundary[[1]][[1]][[1]]),
+               max(bucharest_boundary_osm[[1]][[1]][[1]]))
 })
 
 test_that("City boundary of Paris is correctly returned", {

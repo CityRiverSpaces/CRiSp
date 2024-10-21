@@ -27,6 +27,7 @@ Imports:
 Suggests: 
     ggplot2,
     knitr,
+    purrr,
     rmarkdown,
     testthat (>= 3.0.0)
 VignetteBuilder: 

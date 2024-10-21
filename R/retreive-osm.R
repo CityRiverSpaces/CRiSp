@@ -46,7 +46,7 @@ get_osmdata <- function(name, key, value) {
 get_osm_city_boundary <- function(city_name) {
   fetch_boundary <- function(key, value) {
     CRiSp::get_osmdata(city_name, key, value)$osm_multipolygons |>
-      dplyr::filter(dplyr::if_any(c(.data$`name:en`, .data$name),
+      dplyr::filter(dplyr::if_any(c(`name:en`, name),
                                   ~ . == stringr::str_extract(city_name,
                                                               "^[^,]+"))) |>
       sf::st_geometry()
