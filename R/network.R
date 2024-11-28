@@ -308,6 +308,26 @@ filter_network <- function(network, target) {
     tidygraph::filter(sfnetworks::node_intersects(target))
 }
 
-strokes <- function() {
-  stop("`strokes` not yet implemented.")
+#' Identify naturally continuos lines in a spatial network.
+#'
+#' Extend the specified network edges along the spatial network to form longer
+#' strokes. See [`rcoins::stroke()`] for more details.
+#'
+#' @param network A spatial network object
+#' @param from_edges The indices of the network edges to be continued
+#' @param angle_threshold Consecutive line segments are considered part of the
+#'   same continuous line if the internal angle they form is larger than
+#'   `angle_threshold`` (in degrees). Should be in the range [0, 180) degrees
+#' @param flow_mode If TRUE, line segments that belong to the same edge are not
+#'   split across strokes (even if they form internal angles smaller than
+#'  `angle_threshold`).
+#'
+#' @return Stroke geometries as a simple feature object
+strokes <- function(
+  network, from_edge, angle_threshold = 0., flow_mode = FALSE
+) {
+  rcoins::stroke(
+    network, angle_threshold = angle_threshold, attributes = FALSE,
+    flow_mode = flow_mode, from_edge = from_edge
+  )
 }
