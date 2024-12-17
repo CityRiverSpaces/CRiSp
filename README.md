@@ -27,5 +27,24 @@ This is a basic example which shows you how to solve a common problem:
 
 ``` r
 library(CRiSp)
-## basic example code
+
+# Set location parameters
+city_name <- "Bucharest"
+river_name <- "Dâmbovița"
+epsg_code <- 32635
+
+# Get base layer for plotting
+bucharest_bb <- get_osm_bb(city_name) 
+bucharest_streets <- get_osm_streets(bucharest_bb, epsg_code)[, "geometry"]
+
+# Delineate river corridor
+bucharest_river <- delineate_corridor("Bucharest", "Dâmbovița", epsg_code)
+#> Warning: to_spatial_subdivision assumes attributes are constant over geometries
+#> Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+
+# Plot results
+plot(bucharest_river, border = "orange", lwd = 3)
+plot(bucharest_streets, add = TRUE)
 ```
+
+<img src="man/figures/README-example-1.png" width="100%" />
