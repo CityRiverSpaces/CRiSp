@@ -11,6 +11,7 @@ delineate_corridor(
   bbox_buffer = NULL,
   initial_method = "buffer",
   capping_method = "direct",
+  angle_threshold = 90,
   segments = FALSE,
   riverspace = FALSE
 )
@@ -32,6 +33,10 @@ corridor geometry. See \code{\link[=initial_corridor]{initial_corridor()}} for t
 \item{capping_method}{The method employed to connect the corridor edge end
 points (i.e. to "cap" the corridor). See \code{\link[=cap_corridor]{cap_corridor()}} for
 the available methods}
+
+\item{angle_threshold}{Only network edges forming angles above this threshold
+(in degrees) are considered when forming segment edges. See
+\code{\link[=get_segments]{get_segments()}}  and \code{\link[rcoins:stroke]{rcoins::stroke()}}. Only used if \code{segments} is TRUE.}
 
 \item{segments}{Whether to carry out the corridor segmentation}
 

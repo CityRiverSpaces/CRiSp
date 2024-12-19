@@ -5,15 +5,17 @@
 \alias{bucharest_dem}
 \title{CRiSp example DEM data for Bucharest}
 \format{
-TODO
+A PackedSpatRaster object. Run \code{\link[terra:wrap]{terra::unwrap()}} to extract the
+DEM as a SpatRaster object
 }
 \source{
-Copernicus DEM 30
+\url{https://spacedata.copernicus.eu/collections/copernicus-digital-elevation-model}
 }
 \usage{
 bucharest_dem
 }
 \description{
-Digital Elevation Model (DEM) for examples used in the CRiSp package.
+Copernicus GLO-30 Digital Elevation Model (DEM) cropped and retiled to cover
+the city of Bucharest. Used for examples and vignettes in the CRiSp package.
 }
 \keyword{datasets}

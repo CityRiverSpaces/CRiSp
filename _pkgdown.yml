@@ -12,7 +12,7 @@ articles:
   - getting-osm-data
   - network-preparation
   - corridor-delineation
-  # - corridor-segmentation
+  - corridor-segmentation
   # - riverspace-delineation
   # - multiple-cities
   # - poi-study-area
@@ -33,8 +33,8 @@ navbar:
         - text: Delineation
         - text: 4. Corridor delineation
           href: articles/corridor-delineation.html
-        # - text: 5. Corridor segmentation
-        #   href: articles/corridor-segmentation.html
+        - text: 5. Corridor segmentation
+          href: articles/corridor-segmentation.html
         # - text: 6. Riverspace delineation
         #   href: articles/riverspace-delineation.html
         # - text: -------

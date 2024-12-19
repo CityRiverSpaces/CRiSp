@@ -13,12 +13,14 @@ Description: CRiSp (City River Spaces) provides tools to automate the
 License: Apache License (>= 2)
 URL: https://cityriverspaces.github.io/CRiSp/
 BugReports: https://github.com/CityRiverSpaces/crisp/issues
-Depends: 
+Depends:
     R (>= 2.10)
-Imports: 
+Imports:
+    dbscan,
     dplyr,
     lwgeom,
     osmdata,
+    rcoins,
     rlang,
     rstac,
     sf,
@@ -29,17 +31,19 @@ Imports:
     tibble,
     tidygraph,
     units
-Suggests: 
+Suggests:
     ggplot2,
     gridExtra,
     knitr,
     purrr,
     rmarkdown,
     testthat (>= 3.0.0)
-VignetteBuilder: 
+VignetteBuilder:
     knitr
 Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
+Remotes:
+    github::CityRiverSpaces/rcoins

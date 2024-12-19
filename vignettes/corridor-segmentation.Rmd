@@ -1,0 +1,49 @@
+---
+title: "5. Corridor segmentation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{5. Corridor segmentation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(CRiSp)
+```
+
+For a more detailed analysis of an urban river corridor, corridor-level delineation may not be sufficient. The corridor needs to be subdivided into smaller morphological units. Segmentation is a process of subdividing the corridor by using major transversal road or rail infrastructure lines.
+
+By default, the all-in-one function `delineate_corridor()` only returns the corridor boundary. The corridor can be segmented either by setting the argument `segments = TRUE` in `delineate_corridor()` or by using the `get_segments()` function in a separate step.
+
+To demonstrate this as a separate step, we will use the `bucharest_osm$corridor`, `bucharest_osm$streets` and `bucharest_osm$railways` layers from the package data as input.
+
+We first prepare the network and select all the streets and railways that cover the river corridor plus a small buffer region (see also `vignette("network-preparation")`):
+
+```{r eval=FALSE}
+# TODO remove eval=FALSE when the corridor is available as packaged data
+# Build combined street and railway network
+network <- bind_rows(bucharest_osm$streets, bucharest_orsm$railways) |>
+  as_sfnetwork(directed = FALSE)
+
+# Add a 100 meter buffer region to the corridor
+corridor_buffer <- sf::st_buffer(bucharest_osm$corridor, 100)
+
+# Filter the network to the area of interest
+network_filtered <- filter_network(network, corridor_buffer)
+```
+
+We then delineate segments in the corridor. The algorithm spits the corridor using river-crossing transversal edges that form continuous lines in the network:
+
+```{r eval=FALSE}
+# TODO remove eval=FALSE when the corridor is available as packaged data
+segmented_corridor <- get_segments(bucharest_delineation$corridor,
+                                   network_filtered)
+```
+

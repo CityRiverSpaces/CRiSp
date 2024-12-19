@@ -5,19 +5,26 @@
 \alias{bucharest_osm}
 \title{CRiSp example OSM data for Bucharest}
 \format{
-A list with the following components:
+A list of sf objects representing:
 \describe{
-\item{boundary}{A sf object representing the administrative boundary of
-Bucharest.}
+\item{bb}{The city bounding box.}
+\item{boundary}{The administrative boundary of Bucharest.}
+\item{river_centerline}{The Dâmbovița river centerline.}
+\item{river_surface}{The Dâmbovița river area.}
+\item{streets}{The street network.}
+\item{railways}{The railway network.}
 }
 }
 \source{
-OpenStreetMap
+\url{https://www.openstreetmap.org/about}
 }
 \usage{
 bucharest_osm
 }
 \description{
 Data extracted from OpenStreetMap for examples used in the CRiSp package.
+All datasets are provided in a projected coordinate reference system
+(UTM 35), with exception for the bounding box, which is provided as latitude/
+longitude coordinates (WGS84).
 }
 \keyword{datasets}

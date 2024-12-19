@@ -14,7 +14,7 @@
 #'
 #' @return A simple feature geometry representing the river corridor
 #' @export
-corridor <- function(
+get_corridor <- function(
   network, river_centerline, river_surface, bbox, initial_method = "buffer",
   capping_method = "direct"
 ) {
@@ -129,17 +129,6 @@ split_aoi <- function(bbox, river) {
   }
 }
 
-#' Split a geometry along a (multi)linestring.
-#'
-#' @param geometry Geometry to split
-#' @param line Dividing (multi)linestring
-#'
-#' @return A simple feature object
-split <- function(geometry, line) {
-  lwgeom::st_split(geometry, line) |>
-    sf::st_collection_extract()
-}
-
 #' Identify the initial edges of the river corridor
 #'
 #' These are defined by splitting the initial corridor boundary into the
@@ -207,16 +196,4 @@ cap_corridor <- function(edges, method = "direct", network = NULL) {
     )
   }
   as_polygon(c(edges, cap_edge_1, cap_edge_2))
-}
-
-as_linestring <- function(points) {
-  points_union <- sf::st_union(points)
-  sf::st_cast(points_union, "LINESTRING")
-}
-
-as_polygon <- function(lines) {
-  lines_union <- sf::st_union(lines)
-  sf::st_line_merge(lines_union) |>
-    sf::st_polygonize() |>
-    sf::st_collection_extract()
 }
