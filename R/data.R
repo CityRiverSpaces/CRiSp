@@ -13,6 +13,7 @@
 #'  \item{river_surface}{The Dâmbovița river area.}
 #'  \item{streets}{The street network.}
 #'  \item{railways}{The railway network.}
+#'  \item{buildings}{The buildings in the corridor.}
 #' }
 #' @source <https://www.openstreetmap.org/about>
 "bucharest_osm"
