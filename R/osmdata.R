@@ -10,7 +10,7 @@
 #' @return An sf object with the retrieved OpenStreetMap data
 #' @export
 osmdata_as_sf <- function(key, value, bb) {
-  bbox <- as_bbox(bb)
+  bbox <- as_bbox(bb)  # it should be in lat/lon
   bbox |>
     osmdata::opq() |>
     osmdata::add_osm_feature(key = key, value = value) |>
@@ -37,9 +37,10 @@ get_osm_bb <- function(city_name) {
 #' the city boundary, the river centreline and surface, the streets, and the
 #' railways.
 #'
-#' @param bb Bounding box defining the area of interest
 #' @param city_name A character string with the name of the city.
 #' @param river_name A character string with the name of the river.
+#' @param buffer_in_m An integer with the buffer size in meters
+#'             around the river center line.
 #' @param crs An integer with the EPSG code for the projection. If no CRS is
 #'            specified, the default is the UTM zone for the city.
 #'
@@ -48,21 +49,38 @@ get_osm_bb <- function(city_name) {
 #' @export
 #'
 #' @examples
-#' bb <- get_osm_bb("Bucharest")
-#' crs <- get_utm_zone(bb)
-#' get_osmdata(bb, "Bucharest", "Dambovita", crs)
-get_osmdata <- function(bb, city_name, river_name, crs = NULL) {
+#' get_osmdata("Bucharest", "Dambovita", 100, crs)
+
+get_osmdata <- function(
+  city_name, river_name, buffer_in_m = NULL, crs = NULL
+) {
+  bb <- get_osm_bb(city_name)
+  if (is.null(crs)) crs <- get_utm_zone(bb)
+
   boundary <- get_osm_city_boundary(bb, city_name, crs = crs)
+
+  # Retrieve the river center line and surface, cropped to bb
   river <- get_osm_river(bb, river_name, crs = crs)
-  srteets <- get_osm_streets(bb, crs = crs)
-  railways <- get_osm_railways(bb, crs = crs)
+
+  # Use the river center line as bounding object to retrieve streets and
+  # railways
+  bounding_obj <- sf::st_transform(river$centerline, sf::st_crs(bb))
+
+  # Apply the buffer around the river center line
+  if (!is.null(buffer_in_m)) {
+    bounding_obj <- buffer_obj(bounding_obj, buffer_in_m)
+  }
+
+  # Retrieve streets and railways
+  streets <- get_osm_streets(bounding_obj, crs = crs)
+  railways <- get_osm_railways(bounding_obj, crs = crs)
 
   list(
-    bb = bb,
+    aoi = bounding_obj,
     boundary = boundary,
     river_centerline = river$centerline,
     river_surface = river$surface,
-    streets = srteets,
+    streets = streets,
     railways = railways
   )
 }
@@ -147,7 +165,8 @@ get_osm_river <- function(bb, river_name, crs = NULL) {
     dplyr::filter(.data$name == river_name) |>
     # the query can return more features than actually intersecting the bb
     sf::st_filter(sf::st_as_sfc(bb), .predicate = sf::st_intersects) |>
-    sf::st_geometry()
+    sf::st_geometry() |>
+    sf::st_crop(bb)
 
   # Get the river surface
   river_surface <- osmdata_as_sf("natural", "water", bb)

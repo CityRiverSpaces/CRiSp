@@ -49,28 +49,32 @@ as_bbox <- function(x) {
   bbox
 }
 
-#' Apply a buffer region to a bounding box
+#' Apply a buffer region to a sf object
 #'
-#' If the input bbox is in lat/lon coordinates, the buffer is approximately
-#' applied by first transforming the bbox in a suitable projected coordinate
-#' reference system, expanding it with the given buffer, transforming it back to
-#' the lat/lon system, and finally taking the bounding box of the obtained area.
+#' If the input object is in lat/lon coordinates, the buffer is approximately
+#' applied by first transforming the object in a suitable projected coordinate
+#' reference system, expanding it with the given buffer.
 #'
-#' @param bbox Bonding box as a simple feature object
+#' @param a sf object
 #' @param buffer Buffer region in meters
-#' @return Expanded bounding box as a simple feature object
-buffer_bbox <- function(bbox, buffer) {
-  is_bbox_longlat <- sf::st_is_longlat(bbox)
-  bbox_sfc <- sf::st_as_sfc(bbox)
-  if (is_bbox_longlat) {
-    crs_meters <- get_utm_zone(bbox)
-    bbox_sfc <- sf::st_transform(bbox_sfc, crs_meters)
+#' @return Expanded sf object
+buffer_obj <- function(obj, buffer) {
+  is_obj_longlat <- sf::st_is_longlat(obj)
+  is_obj_bbox <- FALSE
+  dst_crs <- sf::st_crs(obj)
+  # check if obj is a bbox
+  is_obj_bbox <- inherits(obj, "bbox")
+  if (is_obj_bbox) obj <- sf::st_as_sfc(obj)
+  if (is_obj_longlat) {
+    crs_meters <- get_utm_zone(obj)
+    obj <- sf::st_transform(obj, crs_meters)
   }
-  bbox_sfc_buffer <- sf::st_buffer(bbox_sfc, buffer)
-  if (is_bbox_longlat) {
-    bbox_sfc_buffer <- sf::st_transform(bbox_sfc_buffer, sf::st_crs(bbox))
+  obj_buffer <- sf::st_buffer(obj, buffer)
+  if (is_obj_longlat) {
+    obj_buffer <- sf::st_transform(obj_buffer, dst_crs)
   }
-  sf::st_bbox(bbox_sfc_buffer)
+  if (is_obj_bbox) obj_buffer <- sf::st_bbox(obj_buffer)
+  obj_buffer
 }
 
 #' Reproject a raster or vector dataset to the specified

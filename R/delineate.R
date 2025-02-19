@@ -4,8 +4,8 @@
 #' @param river_name A river name as a string
 #' @param crs The projected Coordinate Reference System (CRS) to use. If not
 #'   provided, the suitable Universal Transverse Mercator (UTM) CRS is selected
-#' @param bbox_buffer Add a buffer region to the city boundary to avoid edge
-#'   effects close to its limits
+#' @param data_buffer Add a buffer (an integer in meters) around
+#'   river centerline to retrieve additional data (streets, railways, etc.).
 #' @param initial_method The method employed to define the initial river
 #'   corridor geometry. See [initial_corridor()] for the available methods
 #' @param initial_buffer Buffer region to add to the river geometry to setup the
@@ -27,18 +27,18 @@
 #' @return A simple feature geometry
 #' @export
 delineate_corridor <- function(
-  city_name, river_name, crs = NULL, bbox_buffer = NULL,
+  city_name, river_name, crs = NULL, data_buffer = NULL,
   initial_method = "valley", initial_buffer = NULL, dem = NULL,
   capping_method = "direct", angle_threshold = 90, segments = FALSE,
   riverspace = FALSE, ...
 ) {
-  # Define the area of interest and (if not provided) the CRS
-  bbox <- get_osm_bb(city_name)
-  if (!is.null(bbox_buffer)) bbox <- buffer_bbox(bbox, buffer = bbox_buffer)
-  if (is.null(crs)) crs <- get_utm_zone(bbox)
 
-  # Retrieve all relevant OSM datasets within the area of interest
-  osm_data <- get_osmdata(bbox, city_name, river_name, crs = crs)
+  # Retrieve all relevant OSM datasets within the data_buffer
+  osm_data <- get_osmdata(city_name, river_name, data_buffer, crs)
+
+  # Get the bounding box and (if not provided) the CRS
+  bbox <- as_bbox(osm_data$aoi)
+  if (is.null(crs)) crs <- get_utm_zone(osm_data$aoi)
 
   # If using the valley method, and the DEM is not provided, retrieve dataset
   if (initial_method == "valley" && is.null(dem)) {
