@@ -13,7 +13,7 @@ articles:
   - network-preparation
   - corridor-delineation
   - corridor-segmentation
-  # - riverspace-delineation
+  - riverspace-delineation
   # - multiple-cities
   # - poi-study-area
 navbar:
@@ -35,8 +35,8 @@ navbar:
           href: articles/corridor-delineation.html
         - text: 5. Corridor segmentation
           href: articles/corridor-segmentation.html
-        # - text: 6. Riverspace delineation
-        #   href: articles/riverspace-delineation.html
+        - text: 6. Riverspace delineation
+          href: articles/riverspace-delineation.html
         # - text: -------
         # - text: Use cases
         # - text: 7. Multiple delineations

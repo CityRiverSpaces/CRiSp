@@ -14,7 +14,7 @@ License: Apache License (>= 2)
 URL: https://cityriverspaces.github.io/CRiSp/
 BugReports: https://github.com/CityRiverSpaces/crisp/issues
 Depends:
-    R (>= 2.10)
+    R (>= 3.5)
 Imports:
     dbscan,
     dplyr,
@@ -48,3 +48,4 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Remotes:
     github::CityRiverSpaces/rcoins
+    github::CityRiverSpaces/visor

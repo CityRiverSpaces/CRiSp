@@ -13,6 +13,7 @@ A list of sf objects representing:
 \item{river_surface}{The Dâmbovița river area.}
 \item{streets}{The street network.}
 \item{railways}{The railway network.}
+\item{buildings}{The buildings in the corridor.}
 }
 }
 \source{

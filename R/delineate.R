@@ -67,17 +67,47 @@ delineate_corridor <- function(
     corridor_buffer <- sf::st_buffer(corridor, buffer_corridor)
     network_filtered <- filter_network(network, corridor_buffer)
 
-    corridor <- get_segments(corridor, network_filtered,
+    segments <- get_segments(corridor, network_filtered,
                              osm_data$river_centerline, angle_threshold)
+  } else {
+    segments <- NULL
   }
-  if (riverspace) delineate_riverspace()
-  return(corridor)
+
+  if (riverspace) {
+    riverspace <- delineate_riverspace(osm_data$buildings,
+                                       osm_data$river_surface)
+  } else {
+    riverspace <- NULL
+  }
+
+  list(corridor, segments, riverspace)
 }
 
-#' Delinate the riverspace.
+#' Delineate the space surrounding a river
 #'
-#' @return A simple feature geometry
+#' @param occluders Geometry of occluders
+#' @param river List with river surface and centerline
+#' @param rayno Number of rays
+#' @param raylen Length of rays
+#'
+#' @return Polygon geometry with the riverspace
 #' @export
-delineate_riverspace <- function() {
-  stop("Riverspace delineation not yet implemented.")
+#'
+#' @examples
+#' \dontrun{
+#'   delineate_riverspace(bucharest_osm$buildings, bucharest_osm$river_surface)
+#' }
+delineate_riverspace <- function(occluders, river, density = 1 / 50,
+                                 rayno = 41, raylen = 100) {
+  vpoints <- visor::get_viewpoints(river, density = density)
+  isovists <- vector(mode = "list", length = length(vpoints))
+  for (i in seq_along(vpoints)) {
+    isovists[i] <- visor::get_isovist(occluders, vpoints[i], rayno, raylen)
+  }
+  sf::st_union(do.call(c, lapply(isovists, sf::st_sfc))) |>
+    # Drop inner polygons from delineated riverspace
+    sf::st_cast("LINESTRING") |>
+    # The first item is the outer boundary
+    dplyr::first() |>
+    sf::st_cast("POLYGON")
 }

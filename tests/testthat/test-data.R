@@ -1,7 +1,7 @@
 test_that("Bucharest dataset includes all elements", {
   expect_setequal(names(bucharest_osm),
                   c("bb", "boundary", "river_centerline", "river_surface",
-                    "streets", "railways"))
+                    "streets", "railways", "buildings"))
 })
 
 test_that("Bounding box has correct type", {
@@ -22,10 +22,11 @@ test_that("City boundary has one multipolygon geometry", {
   expect_true(sf::st_is(boundary, "MULTIPOLYGON"))
 })
 
-test_that("River center line has one multilinestring geometry", {
+test_that("River center line has one linestring or multilinestring geometry", {
   river_centerline <- bucharest_osm$river_centerline
   expect_equal(length(river_centerline), 1)
-  expect_true(sf::st_is(river_centerline, "MULTILINESTRING"))
+  expect_true(sf::st_geometry_type(river_centerline) %in%
+                c("MULTILINESTRING", "LINESTRING"))
 })
 
 test_that("River surface has one multipolygon geometry", {

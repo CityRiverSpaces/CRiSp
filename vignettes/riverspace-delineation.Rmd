@@ -1,0 +1,33 @@
+---
+title: "6. Riverspace delineation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{6. Riverspace delineation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+```{r setup}
+library(CRiSp)
+```
+
+River space delineation is a delineation step that uses the river and buildings as input to generate a polygon representing the space between the river and the first line of buildings. We will use River Dâmbovița of Bucharest as the river and the buildings surrounding it as input.
+
+```{r data}
+buildings <- bucharest_osm$buildings
+river <- bucharest_osm$river_surface
+```
+
+The `delineate_riverspace()` function takes the building polygons and river space as input. If no river is found, it will return an error message. If buildings are not found, it will return an unobstructed buffer of a given radius with a warning message. By default, the river space will be capped by the city boundaries. The function returns an sf polygon.
+
+```{r riverspace}
+riverspace <- delineate_riverspace(buildings, river)
+```

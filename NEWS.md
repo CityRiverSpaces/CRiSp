@@ -5,4 +5,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # [Unreleased]
 
-- Add developer guidelines
+## Added
+
+- The first version of the package is created
