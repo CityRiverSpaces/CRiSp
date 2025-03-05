@@ -73,6 +73,41 @@ buffer_bbox <- function(bbox, buffer) {
   sf::st_bbox(bbox_sfc_buffer)
 }
 
+
+#' Extend a line by a given distance
+#'
+#' @param line Linestring object
+#' @param distance Distance to extend the line
+#'
+#' @return Extended linestring object
+extend_line <- function(line, distance) {
+  if (distance < 0) {
+    stop("Distance must be a positive numeric value.")
+  }
+
+  if (distance == 0) {
+    return(line)
+  }
+
+  # Extract start and end points
+  coords <- sf::st_coordinates(line)[, 1:2]  # Get X and Y coordinates
+  start <- coords[1, ]
+  end <- coords[nrow(coords), ]
+
+  # Compute direction vectors
+  direction <- (end - start) / sqrt(sum((end - start)^2))  # Normalize
+
+  # Extend both ends
+  new_start <- start - direction * distance
+  new_end <- end + direction * distance
+
+  # Create new extended line
+  new_coords <- rbind(new_start, coords, new_end)
+  new_line <- sf::st_linestring(new_coords) |> sf::st_sfc()
+  sf::st_crs(new_line) <- sf::st_crs(line)
+  new_line
+}
+
 #' Reproject a raster or vector dataset to the specified
 #' coordinate reference system (CRS)
 #'

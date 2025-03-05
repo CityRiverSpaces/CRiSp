@@ -194,3 +194,26 @@ test_that("load_raster correctly retrieve and merge local data", {
     }
   )
 })
+
+line <- sf::st_linestring(matrix(c(0, 0, 10, 10), ncol = 2, byrow = TRUE)) |>
+  sf::st_sfc(crs = 4326)
+extended_line <- extend_line(line, 5)
+
+test_that("Extended line is longer", {
+  original_length <- sf::st_length(line)
+  extended_length <- sf::st_length(extended_line)
+  expect_gt(extended_length, original_length)
+})
+
+test_that("Original and extended line have the same CRS", {
+  expect_equal(sf::st_crs(line), sf::st_crs(extended_line))
+})
+
+test_that("Extension with 0 works", {
+  extended_line_0 <- extend_line(line, 0)
+  expect_equal(sf::st_coordinates(extended_line_0), sf::st_coordinates(line))
+})
+
+test_that("Extension with negative distance is not allowed", {
+  expect_error(extend_line(line, -1))
+})

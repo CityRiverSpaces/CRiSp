@@ -188,8 +188,11 @@ corridor_end_points <- function(river, network, aoi = NULL) {
 #'
 #' @return A simple feature geometry set of two areas of interest
 #' @importFrom rlang .data
-split_aoi <- function(bbox, river) {
-  regions <- split_by(sf::st_as_sfc(bbox), river)
+split_aoi <- function(bbox, river)  {
+  bbox <- bbox |>
+    sf::st_as_sfc() |>
+    sf::st_cast("POLYGON")  # Drop inner polygons resulting from islands
+  regions <- split_by(bbox, river)
 
   if (length(regions) > 2) {
     # Sort fragments according to area in descending order
