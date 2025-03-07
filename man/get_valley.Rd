@@ -4,14 +4,12 @@
 \alias{get_valley}
 \title{Extract the river valley from the DEM}
 \usage{
-get_valley(dem, river, bbox = NULL)
+get_valley(dem, river)
 }
 \arguments{
 \item{dem}{Digital elevation model of the region}
 
 \item{river}{A simple feature geometry representing the river}
-
-\item{bbox}{Bounding box defining the extent of the area of interest}
 }
 \value{
 River valley as a simple feature geometry

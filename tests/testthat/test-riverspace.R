@@ -7,7 +7,7 @@ test_that("The riverspace of Dâmbovița within 100m is correctly returned", {
   actual_surface <- sf::st_area(riverspace_actual)
   # A tolerance of 100,000 m^2 is used to account for changes in input data
   # (buildings added or removed in OSM)
-  expected_surface <- units::set_units(7742422, "m^2")
+  expected_surface <- units::set_units(7259076, "m^2")
   expect_lt(abs(expected_surface - actual_surface),
             units::set_units(1e05, "m^2"))
 })

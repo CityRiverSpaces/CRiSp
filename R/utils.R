@@ -49,28 +49,52 @@ as_bbox <- function(x) {
   bbox
 }
 
-#' Apply a buffer region to a bounding box
+#' Apply a buffer region to a sf object
 #'
-#' If the input bbox is in lat/lon coordinates, the buffer is approximately
-#' applied by first transforming the bbox in a suitable projected coordinate
-#' reference system, expanding it with the given buffer, transforming it back to
-#' the lat/lon system, and finally taking the bounding box of the obtained area.
+#' If the input object is in lat/lon coordinates, the buffer is approximately
+#' applied by first transforming the object in a suitable projected CRS,
+#' expanding it with the given buffer, and then transforming
+#' it back to the lat/lon system.
 #'
-#' @param bbox Bonding box as a simple feature object
-#' @param buffer Buffer region in meters
-#' @return Expanded bounding box as a simple feature object
-buffer_bbox <- function(bbox, buffer) {
-  is_bbox_longlat <- sf::st_is_longlat(bbox)
-  bbox_sfc <- sf::st_as_sfc(bbox)
-  if (is_bbox_longlat) {
-    crs_meters <- get_utm_zone(bbox)
-    bbox_sfc <- sf::st_transform(bbox_sfc, crs_meters)
+#' @param obj A sf object
+#' @param buffer_distance Buffer distance in meters
+#' @return Expanded sf object
+buffer <- function(obj, buffer_distance) {
+  is_obj_longlat <- sf::st_is_longlat(obj)
+  dst_crs <- sf::st_crs(obj)
+  # check if obj is a bbox
+  is_obj_bbox <- inherits(obj, "bbox")
+  if (is_obj_bbox) obj <- sf::st_as_sfc(obj)
+  if (is_obj_longlat) {
+    crs_meters <- get_utm_zone(obj)
+    obj <- sf::st_transform(obj, crs_meters)
   }
-  bbox_sfc_buffer <- sf::st_buffer(bbox_sfc, buffer)
-  if (is_bbox_longlat) {
-    bbox_sfc_buffer <- sf::st_transform(bbox_sfc_buffer, sf::st_crs(bbox))
+  expanded_obj <- sf::st_buffer(obj, buffer_distance)
+  if (is_obj_longlat) {
+    expanded_obj <- sf::st_transform(expanded_obj, dst_crs)
   }
-  sf::st_bbox(bbox_sfc_buffer)
+  if (is_obj_bbox) expanded_obj <- sf::st_bbox(expanded_obj)
+  expanded_obj
+}
+
+#' Draw a corridor as a fixed buffer region around a river.
+#'
+#' The river geometry may consist of multiple spatial features, these are merged
+#' after applying the buffer.
+#'
+#' @param river A simple feature geometry representing the river
+#' @param buffer_distance Size of the buffer (in the river's CRS units)
+#' @param bbox Bounding box defining the extent of the area of interest
+#'
+#' @return A simple feature geometry
+river_buffer <- function(river, buffer_distance, bbox = NULL) {
+  river_buf <- buffer(river, buffer_distance)
+  river_buf_union <- sf::st_union(river_buf)
+  if (!is.null(bbox)) {
+    sf::st_crop(river_buf_union, bbox)
+  } else {
+    river_buf_union
+  }
 }
 
 #' Reproject a raster or vector dataset to the specified

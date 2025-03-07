@@ -20,26 +20,6 @@ test_that("proper parameters must be provided depending on selected method", {
                "Unknown method to initialize river corridor: crisp")
 })
 
-test_that("River buffer implements a buffer function", {
-  river <- bucharest_osm$river_centerline
-  actual <- river_buffer(river, buffer = 0.5)
-  expected <- sf::st_buffer(river, 0.5)
-  expect_setequal(actual, expected)
-})
-
-test_that("River buffer can trim to the region of interest", {
-  river <- bucharest_osm$river_centerline
-  bbox <- sf::st_bbox(bucharest_osm$boundary)
-  actual <- river_buffer(river, buffer = 0.5, bbox = bbox)
-  river_buffer <- sf::st_buffer(river, 0.5)
-  overlap_matrix <- sf::st_overlaps(river_buffer, actual, sparse = FALSE)
-  expect_equal(dim(overlap_matrix), c(1, 1))
-  expect_true(overlap_matrix[1, 1])
-  actual_bbox <- sf::st_bbox(actual)
-  expect_true(all(actual_bbox[c("xmin", "ymin")] >= bbox[c("xmin", "ymin")]))
-  expect_true(all(actual_bbox[c("xmax", "ymax")] <= bbox[c("xmax", "ymax")]))
-})
-
 test_that("Endpoints are found for two intersections with network edges", {
   river <- sf::st_sfc(sf::st_linestring(cbind(c(-2, 0, 0), c(0, 0, -2))))
   network_edges <- sf::st_sfc(

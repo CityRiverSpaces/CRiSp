@@ -4,15 +4,15 @@
 \alias{osmdata_as_sf}
 \title{Retrieve OpenStreetMap data as sf object}
 \usage{
-osmdata_as_sf(key, value, bb, force_download = FALSE)
+osmdata_as_sf(key, value, aoi, force_download = FALSE)
 }
 \arguments{
 \item{key}{A character string with the key to filter the data}
 
 \item{value}{A character string with the value to filter the data}
 
-\item{bb}{A bounding box, provided either as a matrix (rows for "x", "y",
-columns for "min", "max") or as a vector ("xmin", "ymin", "xmax", "ymax")}
+\item{aoi}{An area of interest, provided either as as sf object or "bbox" or
+as a vector ("xmin", "ymin", "xmax", "ymax")}
 
 \item{force_download}{Download data even if cached data is available}
 }

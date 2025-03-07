@@ -47,7 +47,7 @@ bb <- get_osm_bb(city_name)
 streets <- get_osm_streets(bb, epsg_code)$geometry
 
 # Delineate river corridor
-corridor <- delineate(city_name, river_name)
+corridor <- delineate(city_name, river_name)$corridor
 
 # Plot results
 plot(corridor, border = "orange", lwd = 3)

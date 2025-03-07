@@ -4,10 +4,10 @@
 \alias{get_osm_streets}
 \title{Get OpenStreetMap streets}
 \usage{
-get_osm_streets(bb, crs = NULL, highway_values = NULL, force_download = FALSE)
+get_osm_streets(aoi, crs = NULL, highway_values = NULL, force_download = FALSE)
 }
 \arguments{
-\item{bb}{Bounding box of class \code{bbox}}
+\item{aoi}{Area of interest as sf object or bbox}
 
 \item{crs}{Coordinate reference system as EPSG code}
 

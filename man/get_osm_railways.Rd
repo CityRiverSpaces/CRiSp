@@ -4,10 +4,10 @@
 \alias{get_osm_railways}
 \title{Get OpenStreetMap railways}
 \usage{
-get_osm_railways(bb, crs = NULL, force_download = FALSE)
+get_osm_railways(aoi, crs = NULL, force_download = FALSE)
 }
 \arguments{
-\item{bb}{Bounding box of class \code{bbox}}
+\item{aoi}{Area of interest as sf object or bbox}
 
 \item{crs}{Coordinate reference system as EPSG code}
 

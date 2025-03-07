@@ -61,17 +61,12 @@ get_dem <- function(bb, dem_source = "STAC", stac_endpoint = NULL,
 #'
 #' @param dem Digital elevation model of the region
 #' @param river A simple feature geometry representing the river
-#' @param bbox Bounding box defining the extent of the area of interest
 #'
 #' @return River valley as a simple feature geometry
 #' @export
-get_valley <- function(dem, river, bbox = NULL) {
+get_valley <- function(dem, river) {
   if (!terra::same.crs(dem, sf::st_crs(river)$wkt)) {
     stop("DEM and river geometry should be in the same CRS")
-  }
-  if (!is.null(bbox)) {
-    bbox <- as_bbox(bbox)
-    dem <- terra::crop(dem, terra::ext(bbox))
   }
   cd_masked <- smooth_dem(dem) |>
     get_slope() |>
@@ -141,7 +136,7 @@ load_dem <- function(bb, tile_urls, force_download = FALSE) {
     return(dem)
   }
 
-  dem <- load_raster(tile_urls, bbox = bb)
+  dem <- load_raster(tile_urls, bbox = bbox)
 
   write_data_to_cache(dem, filepath, wrap = TRUE)
 

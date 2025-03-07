@@ -5,27 +5,29 @@
 \title{Retrieve OpenStreetMap data for a given location}
 \usage{
 get_osmdata(
-  bb,
   city_name,
   river_name,
+  network_buffer = NULL,
+  buildings_buffer = NULL,
   crs = NULL,
-  buildings_buffer = 100,
   force_download = FALSE
 )
 }
 \arguments{
-\item{bb}{Bounding box defining the area of interest}
-
 \item{city_name}{A character string with the name of the city.}
 
 \item{river_name}{A character string with the name of the river.}
 
+\item{network_buffer}{Buffer distance in meters around the river
+to get the streets and railways, default is 0 means no
+network data will be downloaded}
+
+\item{buildings_buffer}{Buffer distance in meters around the river
+to get the buildings, default is 0 means no
+buildings data will be downloaded}
+
 \item{crs}{An integer with the EPSG code for the projection. If no CRS is
 specified, the default is the UTM zone for the city.}
-
-\item{buildings_buffer}{A numeric with the buffer distance in meters around
-the river to retrieve buildings. By default, it is
-100.}
 
 \item{force_download}{Download data even if cached data is available}
 }
@@ -35,13 +37,9 @@ given location
 }
 \description{
 Retrieve OpenStreetMap data for a given location, including
-the city boundary, the river centreline and surface, the streets, and the
-railways.
+the city boundary, the river centreline and surface, the streets, the
+railways, and the buildings
 }
 \examples{
-\dontrun{
-bb <- get_osm_bb("Bucharest")
-crs <- get_utm_zone(bb)
-get_osmdata(bb, "Bucharest", "Dambovita", crs)
-}
+get_osmdata("Bucharest", "Dâmbovița")
 }

@@ -9,7 +9,9 @@ osmdata_query(key, value, bb)
 \arguments{
 \item{key}{A character string with the key to filter the data}
 
-\item{value}{A character string with the value to filter the data}
+\item{value}{A character string with the value to filter the data. If
+value = "" means that you get all features available in OSM for the
+specified bounding box}
 
 \item{bb}{A bounding box, in lat/lon coordinates}
 }

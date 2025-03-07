@@ -8,7 +8,7 @@ delineate_corridor(
   network,
   river_centerline,
   river_surface,
-  bbox,
+  aoi,
   initial_method = "valley",
   buffer = NULL,
   dem = NULL,
@@ -24,7 +24,7 @@ centerline}
 
 \item{river_surface}{A simple feature geometry representing the river surface}
 
-\item{bbox}{Bounding box defining the extent of the area of interest}
+\item{aoi}{Area of interest as sf object or bbox}
 
 \item{initial_method}{The method employed to define the initial river
 corridor geometry. See \code{\link[=initial_corridor]{initial_corridor()}} for the available methods}

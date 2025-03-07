@@ -4,15 +4,12 @@
 \alias{get_osm_buildings}
 \title{Get OpenStreetMap buildings}
 \usage{
-get_osm_buildings(river, crs = NULL, buffer = 100, force_download = FALSE)
+get_osm_buildings(aoi, crs = NULL, force_download = FALSE)
 }
 \arguments{
-\item{river}{An sf object with the river centreline, surface or a list
-with both.}
+\item{aoi}{Area of interest as sf object or bbox}
 
 \item{crs}{Coordinate reference system as EPSG code}
-
-\item{buffer}{A numeric with the buffer distance in meters.}
 
 \item{force_download}{Download data even if cached data is available}
 }
