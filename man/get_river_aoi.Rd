@@ -2,24 +2,24 @@
 % Please edit documentation in R/osmdata.R
 \name{get_river_aoi}
 \alias{get_river_aoi}
-\title{Get an area of interest (aoi) around a river, cropping to the bounding box of
-the city}
+\title{Get an area of interest (AoI) around a river, cropping to the bounding box of
+a city}
 \usage{
-get_river_aoi(river, city_bbox, buffer_distance = NULL)
+get_river_aoi(river, city_bbox, buffer_distance)
 }
 \arguments{
-\item{river}{A list with the river centreline and surface}
+\item{river}{A list with the river centreline and surface geometries}
 
 \item{city_bbox}{Bounding box around the city}
 
 \item{buffer_distance}{Buffer size around the river}
 }
 \value{
-An sf or bbox object
+An sf object in lat/lon coordinates
 }
 \description{
-Get an area of interest (aoi) around a river, cropping to the bounding box of
-the city
+Get an area of interest (AoI) around a river, cropping to the bounding box of
+a city
 }
 \examples{
 bb <- get_osm_bb("Bucharest")

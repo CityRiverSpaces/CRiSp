@@ -4,7 +4,7 @@
 \alias{river_buffer}
 \title{Draw a corridor as a fixed buffer region around a river.}
 \usage{
-river_buffer(river, buffer_distance, bbox = NULL)
+river_buffer(river, buffer_distance, bbox = NULL, side = NULL)
 }
 \arguments{
 \item{river}{A simple feature geometry representing the river}
@@ -12,11 +12,16 @@ river_buffer(river, buffer_distance, bbox = NULL)
 \item{buffer_distance}{Size of the buffer (in the river's CRS units)}
 
 \item{bbox}{Bounding box defining the extent of the area of interest}
+
+\item{side}{Whether to generate a single-sided buffer with a "flat" end.
+This is only applicable if \code{river} is a (multi)linestring geometry.
+Choose between \code{NULL} (double-sided), \code{"right"} and \code{"left"}}
 }
 \value{
 A simple feature geometry
 }
 \description{
-The river geometry may consist of multiple spatial features, these are merged
-after applying the buffer.
+The river geometry may consist of multiple spatial features, these are
+optionally cropped using the area of interest, then merged after applying the
+buffer.
 }

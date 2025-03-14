@@ -15,7 +15,7 @@ delineate(
   initial_buffer = NULL,
   dem = NULL,
   max_iterations = 10,
-  capping_method = "direct",
+  capping_method = "shortest-path",
   angle_threshold = 90,
   corridor = TRUE,
   segments = FALSE,

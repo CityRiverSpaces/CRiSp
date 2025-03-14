@@ -4,12 +4,14 @@
 \alias{buffer}
 \title{Apply a buffer region to a sf object}
 \usage{
-buffer(obj, buffer_distance)
+buffer(obj, buffer_distance, ...)
 }
 \arguments{
 \item{obj}{A sf object}
 
 \item{buffer_distance}{Buffer distance in meters}
+
+\item{...}{Optional parameters passed on to \code{\link[sf:geos_unary]{sf::st_buffer()}}}
 }
 \value{
 Expanded sf object

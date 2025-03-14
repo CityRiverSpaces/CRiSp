@@ -4,17 +4,19 @@
 \alias{clean_network}
 \title{Clean a spatial network.}
 \usage{
-clean_network(network)
+clean_network(network, simplify = TRUE)
 }
 \arguments{
 \item{network}{A network object}
+
+\item{simplify}{Whether}
 }
 \value{
 A cleaned network object
 }
 \description{
 Subdivide edges by \href{https://luukvdmeer.github.io/sfnetworks/articles/sfn02_preprocess_clean.html#subdivide-edges}{adding missing nodes},
-simplify the network (see \code{\link[=simplify_network]{simplify_network()}}), remove
+(optionally) simplify the network (see \code{\link[=simplify_network]{simplify_network()}}), remove
 \href{https://luukvdmeer.github.io/sfnetworks/articles/sfn02_preprocess_clean.html#smooth-pseudo-nodes}{pseudo-nodes},
 and discard all but the main connected component.
 }

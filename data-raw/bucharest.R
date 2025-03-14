@@ -18,6 +18,9 @@ bucharest_osm <- get_osmdata(
 
 # Add delineation to package data
 bucharest_delineation <- delineate(city_name, river_name, crs = epsg_code,
+                                   network_buffer = network_buffer,
+                                   buildings_buffer = buildings_buffer,
+                                   dem_buffer = dem_buffer,
                                    corridor = TRUE, segments = TRUE,
                                    riverspace = TRUE)
 
@@ -28,9 +31,10 @@ fix_wkt_encoding <- function(x) {
   x
 }
 bucharest_osm <- lapply(bucharest_osm, fix_wkt_encoding)
+bucharest_delineation <- lapply(bucharest_delineation, fix_wkt_encoding)
 
 # Fetch the DEM data
-aoi_buff <- buffer(bucharest_osm$aoi, dem_buffer)
+aoi_buff <- buffer(bucharest_osm$aoi_network, dem_buffer)
 bucharest_dem <- get_dem(aoi_buff, crs = epsg_code, force_download = TRUE) |>
   # SpatRaster objects cannot be directly serialized as RDS/RDA files
   terra::wrap()

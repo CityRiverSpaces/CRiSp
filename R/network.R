@@ -142,24 +142,26 @@ calc_rolling_sum <- function(x, n = 2) {
 #'
 # nolint start
 #' Subdivide edges by [adding missing nodes](https://luukvdmeer.github.io/sfnetworks/articles/sfn02_preprocess_clean.html#subdivide-edges),
-#' simplify the network (see [`simplify_network()`]), remove
+#' (optionally) simplify the network (see [`simplify_network()`]), remove
 #' [pseudo-nodes](https://luukvdmeer.github.io/sfnetworks/articles/sfn02_preprocess_clean.html#smooth-pseudo-nodes),
 #' and discard all but the main connected component.
 # nolint end
 #'
 #' @param network A network object
+#' @param simplify Whether
 #'
 #' @return A cleaned network object
 #' @export
-clean_network <- function(network) {
-  network |>
-    # subdivide edges by adding missing nodes
-    tidygraph::convert(sfnetworks::to_spatial_subdivision, .clean = TRUE) |>
-    # run simplification steps
-    simplify_network() |>
-    # remove pseudo-nodes
-    tidygraph::convert(sfnetworks::to_spatial_smooth, .clean = TRUE) |>
-    # keep only the main connected component of the network
+clean_network <- function(network, simplify = TRUE) {
+  # subdivide edges by adding missing nodes
+  net <- tidygraph::convert(network, sfnetworks::to_spatial_subdivision,
+                            .clean = TRUE)
+  # run simplification steps
+  if (simplify) net <- simplify_network(net)
+  # remove pseudo-nodes
+  net <- tidygraph::convert(net, sfnetworks::to_spatial_smooth, .clean = TRUE)
+  # keep only the main connected component of the network
+  net |>
     tidygraph::activate("nodes") |>
     dplyr::filter(tidygraph::group_components() == 1)
 }

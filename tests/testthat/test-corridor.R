@@ -20,6 +20,52 @@ test_that("proper parameters must be provided depending on selected method", {
                "Unknown method to initialize river corridor: crisp")
 })
 
+test_that("Build river network works with multiple linestring features", {
+  river <- sf::st_sfc(sf::st_linestring(cbind(c(-2, 0, 0), c(0, 0, -2))))
+  river_network <- build_river_network(river)
+  expect_true(inherits(river_network, "sfnetwork"))
+  actual_edges <- sf::st_geometry(sf::st_as_sf(river_network, "edges"))
+  expect_setequal(river, actual_edges)
+})
+
+test_that("Build river network does not simplify loops", {
+  river <- sf::st_sfc(
+    sf::st_linestring(cbind(c(-2, -1), c(0, 0))),
+    sf::st_linestring(cbind(c(-1, 0, 0), c(0, 0, -1))),
+    sf::st_linestring(cbind(c(0, 0), c(-1, -2))),
+    sf::st_linestring(cbind(c(-1, -1, 0), c(0, -1, -1)))
+  )
+  river_network <- build_river_network(river)
+  expect_true(inherits(river_network, "sfnetwork"))
+  actual_edges <- sf::st_geometry(sf::st_as_sf(river_network, "edges"))
+  expect_setequal(river, actual_edges)
+})
+
+test_that("Build river network also works with multilinestrings", {
+  river <- sf::st_sfc(c(
+    sf::st_linestring(cbind(c(-2, -1), c(0, 0))),
+    sf::st_linestring(cbind(c(-1, 0, 0), c(0, 0, -1))),
+    sf::st_linestring(cbind(c(-1, -1, 0), c(0, -1, -1))),
+    sf::st_linestring(cbind(c(0, 0), c(-1, -2)))
+  ))
+  river_network <- build_river_network(river)
+  expect_true(inherits(river_network, "sfnetwork"))
+  actual_edges <- sf::st_geometry(sf::st_as_sf(river_network, "edges"))
+  expected_edges <- sf::st_cast(river, "LINESTRING")
+  expect_setequal(expected_edges, actual_edges)
+})
+
+test_that("Build river network only select longest segment within AoI", {
+  river <- sf::st_sfc(
+    sf::st_linestring(cbind(c(-2, 0, 0, -1), c(0, 0, -1, -1)))
+  )
+  bbox <- sf::st_bbox(c(xmin = -1.5, ymin = -2, xmax = -0.5, ymax = 2))
+  river_network <- build_river_network(river, aoi = bbox)
+  actual_edges <- sf::st_geometry(sf::st_as_sf(river_network, "edges"))
+  expected_edges <- sf::st_sfc(sf::st_linestring(cbind(c(-1.5, -0.5), c(0, 0))))
+  expect_setequal(expected_edges, actual_edges)
+})
+
 test_that("Endpoints are found for two intersections with network edges", {
   river <- sf::st_sfc(sf::st_linestring(cbind(c(-2, 0, 0), c(0, 0, -2))))
   network_edges <- sf::st_sfc(
@@ -28,7 +74,9 @@ test_that("Endpoints are found for two intersections with network edges", {
     sf::st_linestring(cbind(c(0.5, 0.5), c(1, -1))),
     sf::st_linestring(cbind(c(-0.5, -0.5), c(1, -1)))
   )
-  actual <- corridor_end_points(river, network_edges)
+  river_network <- sfnetworks::as_sfnetwork(river, directed = FALSE)
+  spatial_network <- sfnetworks::as_sfnetwork(network_edges, directed = FALSE)
+  actual <- corridor_end_points(river_network, spatial_network)
   expected <- sf::st_sfc(sf::st_point(c(0, -0.5)), sf::st_point(c(-0.5, 0)))
   expect_setequal(actual, expected)
 })
@@ -41,7 +89,9 @@ test_that("Endpoints are found for more intersections with network edges", {
     sf::st_linestring(cbind(c(-0.25, -0.25), c(1, -1))),
     sf::st_linestring(cbind(c(-0.5, -0.5), c(1, -1)))
   )
-  actual <- corridor_end_points(river, network_edges)
+  river_network <- sfnetworks::as_sfnetwork(river, directed = FALSE)
+  spatial_network <- sfnetworks::as_sfnetwork(network_edges, directed = FALSE)
+  actual <- corridor_end_points(river_network, spatial_network)
   expected <- sf::st_sfc(sf::st_point(c(0, -0.5)), sf::st_point(c(-0.5, 0)))
   expect_setequal(actual, expected)
 })
@@ -52,73 +102,31 @@ test_that("An error is raised for a single intersection with network edge", {
     sf::st_linestring(cbind(c(1, -1), c(-0.5, -0.5))),
     sf::st_linestring(cbind(c(0.5, 0.5), c(1, -1)))
   )
-  expect_error(corridor_end_points(river, network_edges), "coincide")
+  river_network <- sfnetworks::as_sfnetwork(river, directed = FALSE)
+  spatial_network <- sfnetworks::as_sfnetwork(network_edges, directed = FALSE)
+  expect_error(corridor_end_points(river_network, spatial_network), "coincide")
 })
 
-test_that("Endpoints are found when the river is a multilinestring", {
-  river <- sf::st_sfc(c(
-    sf::st_linestring(cbind(c(-2, 0, 0), c(0, 0, -2))),
-    sf::st_linestring(cbind(c(-0.25, -0.25, 0), c(0, -0.25, -0.25)))
-  ))
-  network_edges <- sf::st_sfc(
-    sf::st_linestring(cbind(c(1, -1), c(-0.5, -0.5))),
-    sf::st_linestring(cbind(c(1, -1), c(0.5, 0.5))),
-    sf::st_linestring(cbind(c(0.5, 0.5), c(1, -1))),
-    sf::st_linestring(cbind(c(-0.5, -0.5), c(1, -1)))
-  )
-  actual <- corridor_end_points(river, network_edges)
-  expected <- sf::st_sfc(sf::st_point(c(0, -0.5)), sf::st_point(c(-0.5, 0)))
-  expect_setequal(actual, expected)
-})
-
-test_that("Endpoints are found when sfnetwork object is provided", {
+test_that("River banks for a simple river gives two regions", {
   river <- sf::st_sfc(sf::st_linestring(cbind(c(-2, 0, 0), c(0, 0, -2))))
-  network_edges <- sf::st_sfc(
-    sf::st_linestring(cbind(c(1, -1), c(-0.5, -0.5))),
-    sf::st_linestring(cbind(c(1, -1), c(0.5, 0.5))),
-    sf::st_linestring(cbind(c(0.5, 0.5), c(1, -1))),
-    sf::st_linestring(cbind(c(-0.5, -0.5), c(1, -1)))
-  )
-  network <- sfnetworks::as_sfnetwork(network_edges, directed = FALSE)
-  actual <- corridor_end_points(river, network)
-  expected <- sf::st_sfc(sf::st_point(c(0, -0.5)), sf::st_point(c(-0.5, 0)))
-  expect_setequal(actual, expected)
+  regions <- get_river_banks(river, width = 1)
+  expect_equal(length(regions), 2)
+  expect_true(all(sf::st_geometry_type(regions) == "POLYGON"))
 })
 
-test_that("Endpoints are found when a bounding box is specified", {
-  river <- sf::st_sfc(sf::st_linestring(cbind(c(-2, 0, 0), c(0, 0, -2))))
-  network_edges <- sf::st_sfc(
-    sf::st_linestring(cbind(c(1, -1), c(-0.5, -0.5))),
-    sf::st_linestring(cbind(c(1, -1), c(-0.25, -0.25))),
-    sf::st_linestring(cbind(c(-0.25, -0.25), c(1, -1))),
-    sf::st_linestring(cbind(c(-0.5, -0.5), c(1, -1)))
-  )
-  bbox <- sf::st_bbox(c(xmin = 0, xmax = 1, ymin = -1, ymax = 1))
-  actual <- corridor_end_points(river, network_edges, aoi = bbox)
-  expected <- sf::st_sfc(sf::st_point(c(0, -0.25)), sf::st_point(c(0, -0.5)))
-  expect_setequal(actual, expected)
-})
-
-test_that("Splitting an AoI by a crossing river gives two regions", {
-  river <- sf::st_sfc(sf::st_linestring(cbind(c(-2, 0, 0), c(0, 0, -2))))
-  bbox <- sf::st_bbox(c(xmin = -1, xmax = 1, ymin = -1, ymax = 1))
-  aoi_split <- split_aoi(bbox, river)
-  expect_equal(length(aoi_split), 2)
-})
-
-test_that("Splitting an AoI by a more complex river still gives two regions", {
+test_that("River banks for a more complex river still gives two regions", {
   river <- sf::st_sfc(sf::st_linestring(cbind(c(-2, 2, 2, -2),
                                               c(0.5, 0.5, -0.75, -0.75))))
-  bbox <- sf::st_bbox(c(xmin = -1, xmax = 1, ymin = -1, ymax = 1))
-  aoi_split <- split_aoi(bbox, river)
-  expect_equal(length(aoi_split), 2)
+  regions <- get_river_banks(river, width = 2)
+  expect_equal(length(regions), 2)
+  expect_true(all(sf::st_geometry_type(regions) == "POLYGON"))
+
 })
 
-test_that("Splitting an AoI by a river works with real data", {
-  bbox <- sf::st_bbox(bucharest_osm$boundary)
+test_that("River banks works with real data", {
   river <- bucharest_osm$river_centerline
-  aoi_split <- split_aoi(bbox, river)
-  expect_equal(length(aoi_split), 2)
+  regions <- get_river_banks(river, width = 2500)
+  expect_equal(length(regions), 2)
 })
 
 test_that("Initial edges are identified if corridor exceeds AoI", {

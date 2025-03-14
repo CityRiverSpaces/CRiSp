@@ -1,17 +1,20 @@
 test_that("Bucharest dataset includes all elements", {
   expect_setequal(names(bucharest_osm),
-                  c("aoi", "boundary", "river_centerline", "river_surface",
-                    "streets", "railways", "buildings"))
+                  c("bb", "aoi_network", "aoi_buildings", "boundary",
+                    "river_centerline", "river_surface", "streets",
+                    "railways", "buildings"))
 })
 
 test_that("Bounding box has correct type", {
-  expect_true(sf::st_is(bucharest_osm$aoi, "POLYGON"))
+  expect_true(inherits(bucharest_osm$bb, "bbox"))
 })
 
-test_that("Only the bounding box has a geographic CRS", {
+test_that("Only the bbox and the AoI's have a geographic CRS", {
   is_longlat <- sapply(bucharest_osm, sf::st_is_longlat)
-  expect_true(is_longlat["aoi"])
-  others <- is_longlat[names(bucharest_osm) != "aoi"]
+  expect_true(is_longlat["aoi_network"])
+  others <- is_longlat[
+    !(names(bucharest_osm) %in% c("bb", "aoi_network", "aoi_buildings"))
+  ]
   expect_true(!any(others))
 })
 

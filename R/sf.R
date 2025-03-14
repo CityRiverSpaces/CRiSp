@@ -22,6 +22,12 @@ as_sfc <- function(x) {
 }
 
 #' @noRd
+find_largest <- function(geometry) {
+  area <- sf::st_area(geometry)
+  which.max(area)
+}
+
+#' @noRd
 find_smallest <- function(geometry) {
   area <- sf::st_area(geometry)
   which.min(area)

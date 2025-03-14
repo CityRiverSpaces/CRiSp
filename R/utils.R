@@ -58,19 +58,20 @@ as_bbox <- function(x) {
 #'
 #' @param obj A sf object
 #' @param buffer_distance Buffer distance in meters
+#' @param ... Optional parameters passed on to [`sf::st_buffer()`]
 #' @return Expanded sf object
-buffer <- function(obj, buffer_distance) {
+buffer <- function(obj, buffer_distance, ...) {
   is_obj_longlat <- sf::st_is_longlat(obj)
   dst_crs <- sf::st_crs(obj)
   # check if obj is a bbox
   is_obj_bbox <- inherits(obj, "bbox")
   if (is_obj_bbox) obj <- sf::st_as_sfc(obj)
-  if (is_obj_longlat) {
+  if (!is.na(is_obj_longlat) && is_obj_longlat) {
     crs_meters <- get_utm_zone(obj)
     obj <- sf::st_transform(obj, crs_meters)
   }
-  expanded_obj <- sf::st_buffer(obj, buffer_distance)
-  if (is_obj_longlat) {
+  expanded_obj <- sf::st_buffer(obj, buffer_distance, ...)
+  if (!is.na(is_obj_longlat) && is_obj_longlat) {
     expanded_obj <- sf::st_transform(expanded_obj, dst_crs)
   }
   if (is_obj_bbox) expanded_obj <- sf::st_bbox(expanded_obj)
@@ -79,21 +80,38 @@ buffer <- function(obj, buffer_distance) {
 
 #' Draw a corridor as a fixed buffer region around a river.
 #'
-#' The river geometry may consist of multiple spatial features, these are merged
-#' after applying the buffer.
+#' The river geometry may consist of multiple spatial features, these are
+#' optionally cropped using the area of interest, then merged after applying the
+#' buffer.
 #'
 #' @param river A simple feature geometry representing the river
 #' @param buffer_distance Size of the buffer (in the river's CRS units)
 #' @param bbox Bounding box defining the extent of the area of interest
+#' @param side Whether to generate a single-sided buffer with a "flat" end.
+#'   This is only applicable if `river` is a (multi)linestring geometry.
+#'   Choose between `NULL` (double-sided), `"right"` and `"left"`
 #'
 #' @return A simple feature geometry
-river_buffer <- function(river, buffer_distance, bbox = NULL) {
-  river_buf <- buffer(river, buffer_distance)
-  river_buf_union <- sf::st_union(river_buf)
-  if (!is.null(bbox)) {
-    sf::st_crop(river_buf_union, bbox)
+river_buffer <- function(river, buffer_distance, bbox = NULL, side = NULL) {
+  if (!is.null(bbox)) river <- sf::st_crop(river, bbox)
+  if (is.null(side)) {
+    river_buf <- buffer(river, buffer_distance)
+    return(sf::st_union(river_buf))
   } else {
-    river_buf_union
+    if (side == "left") {
+      river_buf <- buffer(river, buffer_distance, singleSide = TRUE)
+    } else if (side == "right") {
+      river_buf <- buffer(river, -buffer_distance, singleSide = TRUE)
+    } else {
+      stop("If specified, 'side' should be either 'right' or 'left'")
+    }
+    # Merge all components, than make sure we do not spill over the river by
+    # splitting the computed geometry with the river centerline and by
+    # selecting the largest region
+    splits <- split_by(sf::st_union(river_buf), river)
+    river_buf <- splits[find_largest(splits)]
+    # Finally drop any eventual hole
+    return(sfheaders::sf_remove_holes(river_buf))
   }
 }
 

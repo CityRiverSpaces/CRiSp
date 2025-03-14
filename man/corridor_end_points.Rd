@@ -4,26 +4,21 @@
 \alias{corridor_end_points}
 \title{Find the corridor end points.}
 \usage{
-corridor_end_points(river, network, aoi = NULL)
+corridor_end_points(river_network, spatial_network)
 }
 \arguments{
-\item{river}{A simple feature geometry representing the river centerline}
+\item{river_network}{A \code{\link[sfnetworks:sfnetwork]{sfnetworks::sfnetwork}} object representing the
+river centerline}
 
-\item{network}{The spatial network used for the delineation, either provided
-as an \code{\link[sfnetworks:sfnetwork]{sfnetworks::sfnetwork}} or as an \code{\link[sf:sf]{sf::sf}}/\code{\link[sf:sfc]{sf::sfc}} object
-(edges only)}
-
-\item{aoi}{Area of interest, provided as a bounding box or as polygon. If not
-given, it is taken as the bounding box of the spatial network}
+\item{spatial_network}{A \code{\link[sfnetworks:sfnetwork]{sfnetworks::sfnetwork}} object representing the
+spatial network used for the delineation}
 }
 \value{
 A simple feature geometry including a pair of points
 }
 \description{
-Determine the extremes (start and end point) of the river corridor
-using the river center line and the spatial network used for the delineation.
-The end points are selected as the most external river crossing edges of the
-network within the area of interest. If the river intersects the
-area of interest multiple times, only the longest intersecting segment is
-considered here.
+Determine the extremes (end points) of the river corridor using the network
+built from the river center line features (see \code{\link[=build_river_network]{build_river_network()}} and
+the spatial network used for the delineation. The end points are selected as
+the two furthest river crossings of the spatial network.
 }

@@ -8,7 +8,8 @@ delineate_corridor(
   network,
   river_centerline,
   river_surface,
-  aoi,
+  aoi = NULL,
+  max_width = 2500,
   initial_method = "valley",
   buffer = NULL,
   dem = NULL,
@@ -25,6 +26,9 @@ centerline}
 \item{river_surface}{A simple feature geometry representing the river surface}
 
 \item{aoi}{Area of interest as sf object or bbox}
+
+\item{max_width}{(Approximate) maximum width of the regions considered on the
+two river banks}
 
 \item{initial_method}{The method employed to define the initial river
 corridor geometry. See \code{\link[=initial_corridor]{initial_corridor()}} for the available methods}
