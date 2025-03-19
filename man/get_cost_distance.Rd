@@ -19,3 +19,4 @@ raster of cost distance
 \description{
 Derive cost distance function from masked slope
 }
+\keyword{internal}

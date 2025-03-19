@@ -26,3 +26,7 @@ the specified bounding box
 \description{
 Retrieve the URLs of all the assets intersecting a bbox from a STAC API
 }
+\examples{
+bb <- get_osm_bb("Bucharest")
+get_stac_asset_urls(bb)
+}

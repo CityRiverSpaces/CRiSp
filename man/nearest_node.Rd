@@ -17,3 +17,4 @@ A node in the network as a simple feature geometry
 \description{
 Find the node in a network that is closest to a target geometry.
 }
+\keyword{internal}

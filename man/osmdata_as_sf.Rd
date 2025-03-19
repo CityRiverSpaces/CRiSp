@@ -24,3 +24,9 @@ Query the Overpass API for a key:value pair within a given bounding box
 (provided as lat/lon coordiates). Results are cached, so that new queries
 with the same input parameters will be loaded from disk.
 }
+\examples{
+\dontrun{
+bb <- get_osm_bb("Bucharest")
+osmdata_as_sf("highway", "motorway", bb)
+}
+}

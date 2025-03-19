@@ -38,3 +38,4 @@ A simple feature geometry
 \description{
 Draw the initial geometry of a river corridor.
 }
+\keyword{internal}

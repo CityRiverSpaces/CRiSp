@@ -39,7 +39,7 @@ We start by demonstrating the use of the all-in-one `delineate()` function which
 
 The `delineate()` function carries out the above steps in one and returns a list that by default contains the following output elements: `corridor`, `segments`, and `riverspace`.
 
-```{r delineate}
+```{r delineate, fig.alt="Delineation of the corridor of River Dâmbovița in Bucharest"}
 bucharest_dambovita <- delineate(
   city_name,
   river_name,

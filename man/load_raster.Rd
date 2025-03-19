@@ -18,3 +18,4 @@ Raster data as a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object
 If a bounding box is provided, the file(s) are cropped for the given extent.
 The resulting rasters are then merged using \code{\link[terra:merge]{terra::merge}}.
 }
+\keyword{internal}

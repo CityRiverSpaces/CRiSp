@@ -11,7 +11,7 @@
 #'
 #' @examples
 #' \dontrun{
-#'   delineate_riverspace(bucharest_osm$buildings, bucharest_osm$river_surface)
+#' delineate_riverspace(bucharest_osm$buildings, bucharest_osm$river_surface)
 #' }
 delineate_riverspace <- function(occluders, river, density = 1 / 50,
                                  ray_num = 41, ray_length = 100) {

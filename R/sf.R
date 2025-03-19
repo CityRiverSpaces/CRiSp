@@ -61,6 +61,7 @@ find_intersects <- function(geometry, target) {
 #' @param boundary Whether to return the split boundary instead of the regions
 #'
 #' @return A simple feature object
+#' @keywords internal
 split_by <- function(geometry, line, boundary = FALSE) {
   regions <- lwgeom::st_split(geometry, line) |>
     sf::st_collection_extract()

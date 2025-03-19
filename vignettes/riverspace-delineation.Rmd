@@ -35,7 +35,7 @@ riverspace <- delineate_riverspace(buildings, river)
 
 We visualise the riverspace in a subset of segments.
 
-```{r plot-riverspace}
+```{r plot-riverspace, fig.alt="Riverspace delineation"}
 riverspace_segment_2_4 <- riverspace |>
   st_intersection(bucharest_delineation$segments[2:4])
 

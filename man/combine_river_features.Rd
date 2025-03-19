@@ -12,8 +12,9 @@ combine_river_features(river_centerline, river_surface)
 \item{river_surface}{River surface as sfc_POLYGON or sfc_MULTIPOLYGON}
 }
 \value{
-Combined river as sfc_LINESTRING
+Combined river as sfc_MULTILINESTRING
 }
 \description{
 Combine river centerline and surface
 }
+\keyword{internal}

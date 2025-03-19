@@ -2,7 +2,7 @@
 % Please edit documentation in R/corridor.R
 \name{build_river_network}
 \alias{build_river_network}
-\title{Build a spatial network from the river center spatial features}
+\title{Build a spatial network from river centerlines}
 \usage{
 build_river_network(river, aoi = NULL)
 }
@@ -19,3 +19,4 @@ If an area of interest (aoi) is provided, only the river segments that
 intersects it are considered. If the river intersects the area of interest
 multiple times, only the longest intersecting segment will be considered.
 }
+\keyword{internal}

@@ -16,3 +16,8 @@ List of file paths of removed files
 \description{
 Remove files from cache directory either before a given date or entirely.
 }
+\examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+clear_cache()
+\dontshow{\}) # examplesIf}
+}

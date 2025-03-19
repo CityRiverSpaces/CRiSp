@@ -21,3 +21,4 @@ An sf object with the retrieved OpenStreetMap data
 \description{
 Query the Overpass API for a key:value pair within a bounding box
 }
+\keyword{internal}

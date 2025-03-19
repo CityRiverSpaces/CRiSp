@@ -15,3 +15,4 @@ get_valley_polygon_no_hole(valley_polygon)
 \description{
 Remove possible holes from valley geometry
 }
+\keyword{internal}

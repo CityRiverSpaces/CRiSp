@@ -40,6 +40,6 @@ bucharest_dem <- get_dem(aoi_buff, crs = epsg_code, force_download = TRUE) |>
   terra::wrap()
 
 # Save as package data
-usethis::use_data(bucharest_osm, overwrite = TRUE)
-usethis::use_data(bucharest_dem, overwrite = TRUE)
-usethis::use_data(bucharest_delineation, overwrite = TRUE)
+usethis::use_data(bucharest_osm, overwrite = TRUE, compress = "xz")
+usethis::use_data(bucharest_dem, overwrite = TRUE, compress = "xz")
+usethis::use_data(bucharest_delineation, overwrite = TRUE, compress = "xz")

@@ -20,3 +20,4 @@ Refined corridor segments as a simple feature geometry
 Recursively merge the candidate segments provided ("blocks"), until they all
 intersect the river centerline and both sides of the corridor.
 }
+\keyword{internal}

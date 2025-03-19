@@ -34,6 +34,9 @@ default_stac_dem <- list(
 #'
 #' @return DEM as a terra SpatRaster object
 #' @export
+#' @examplesIf interactive()
+#' bb <- get_osm_bb("Bucharest")
+#' get_dem(bb)
 get_dem <- function(bb, dem_source = "STAC", stac_endpoint = NULL,
                     stac_collection = NULL, crs = NULL,
                     force_download = FALSE) {
@@ -64,6 +67,8 @@ get_dem <- function(bb, dem_source = "STAC", stac_endpoint = NULL,
 #'
 #' @return River valley as a simple feature geometry
 #' @export
+#' @examples
+#' get_valley(terra::unwrap(bucharest_dem), bucharest_osm$river_centerline)
 get_valley <- function(dem, river) {
   if (!terra::same.crs(dem, sf::st_crs(river)$wkt)) {
     stop("DEM and river geometry should be in the same CRS")
@@ -93,6 +98,9 @@ get_valley <- function(dem, river) {
 #' @return A list of URLs for the assets in the collection overlapping with
 #'   the specified bounding box
 #' @export
+#' @examples
+#' bb <- get_osm_bb("Bucharest")
+#' get_stac_asset_urls(bb)
 get_stac_asset_urls <- function(bb, endpoint = NULL, collection = NULL) {
   if (is.null(endpoint) && is.null(collection)) {
     endpoint <- default_stac_dem$endpoint
@@ -126,6 +134,10 @@ get_stac_asset_urls <- function(bb, endpoint = NULL, collection = NULL) {
 #'
 #' @return Raster DEM, retrieved and retiled to the given bounding box
 #' @export
+#' @examplesIf interactive()
+#' bb <- get_osm_bb("Bucharest")
+#' tile_urls <- get_stac_asset_urls(bb)
+#' load_dem(bb, tile_urls)
 load_dem <- function(bb, tile_urls, force_download = FALSE) {
   bbox <- as_bbox(bb)
 
@@ -155,6 +167,8 @@ load_dem <- function(bb, tile_urls, force_download = FALSE) {
 #' @return The input DEM. This function is used for the side-effect of writing
 #'   values to a file.
 #' @export
+#' @examplesIf interactive()
+#' dem_to_cog(terra::unwrap(bucharest_dem), "bucharest_dem.tif")
 dem_to_cog <- function(dem, fpath, output_directory = NULL) {
   if (is.null(output_directory)) {
     filename <- basename(fpath)
@@ -180,6 +194,8 @@ dem_to_cog <- function(dem, fpath, output_directory = NULL) {
 #'
 #' @return filtered dem
 #' @export
+#' @examples
+#' smooth_dem(terra::unwrap(bucharest_dem))
 smooth_dem <- function(dem, method = "median", window = 5) {
   dem_smoothed <- terra::focal(dem, w = window, fun = method)
   names(dem_smoothed) <- "dem_smoothed"
@@ -193,7 +209,7 @@ smooth_dem <- function(dem, method = "median", window = 5) {
 #' @param dem raster data of dem
 #'
 #' @return raster of derived slope over dem extent
-#' @export
+#' @keywords internal
 get_slope <- function(dem) {
   slope_radians <- terra::terrain(dem, v = "slope", unit = "radians")
   tan(slope_radians)
@@ -208,8 +224,7 @@ get_slope <- function(dem) {
 #' @param target value to set for pixels overlapping river area
 #'
 #' @return updated slope raster
-#'
-#' @export
+#' @keywords internal
 mask_slope <- function(slope, river, lthresh = 1.e-3, target = 0) {
   slope_masked <- terra::mask(slope,
                               terra::ifel(slope <= lthresh, NA, 1),
@@ -231,7 +246,7 @@ mask_slope <- function(slope, river, lthresh = 1.e-3, target = 0) {
 #' @param target value for cost distance calculation
 #'
 #' @return raster of cost distance
-#' @export
+#' @keywords internal
 get_cost_distance <- function(slope, river, target = 0) {
   slope_masked <- mask_slope(slope, river, target = target)
   cd <- terra::costDist(slope_masked, target = target)
@@ -246,7 +261,7 @@ get_cost_distance <- function(slope, river, target = 0) {
 #' @param buffer size of buffer around river polygon to additionally mask
 #'
 #' @return cd raster with river+BUFFER pixels masked
-#' @export
+#' @keywords internal
 mask_cost_distance <- function(cd, river, buffer = 2000) {
   river_buffer <- sf::st_buffer(river, buffer) |> terra::vect()
   terra::mask(
@@ -263,7 +278,7 @@ mask_cost_distance <- function(cd, river, buffer = 2000) {
 #' @param method function used to derive caracteristic value (mean)
 #'
 #' @return characteristic value of cd raster
-#' @export
+#' @keywords internal
 get_cd_char <- function(cd, method = "mean") {
   if (method == "mean") {
     mean(terra::values(cd), na.rm = TRUE)
@@ -278,7 +293,7 @@ get_cd_char <- function(cd, method = "mean") {
 #'
 #' @return polygon representation of valley area as st_geometry
 #' @importFrom rlang .data
-#' @export
+#' @keywords internal
 get_valley_polygon_raw <- function(valley_mask) {
   terra::as.polygons(valley_mask, dissolve = TRUE) |>
     sf::st_as_sf() |>
@@ -291,7 +306,7 @@ get_valley_polygon_raw <- function(valley_mask) {
 #' @param valley_polygon st_geometry of valley region
 #'
 #' @return (multi)polygon geometry of valley
-#' @export
+#' @keywords internal
 get_valley_polygon_no_hole <- function(valley_polygon) {
   valley_polygon |>
     sf::st_cast("POLYGON") |>
@@ -306,7 +321,7 @@ get_valley_polygon_no_hole <- function(valley_polygon) {
 #'
 #' @return (multi)polygon representation of valley area as a simple feature
 #'   geometry without holes
-#' @export
+#' @keywords internal
 get_valley_polygon <- function(valley_mask) {
   get_valley_polygon_raw(valley_mask) |>
     get_valley_polygon_no_hole()

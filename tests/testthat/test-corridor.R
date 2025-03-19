@@ -228,3 +228,21 @@ test_that("Capping a corridor with 'shortest_path' uses network paths", {
   # we verify that the corridor includes all the nodes of the network
   expect_setequal(pts_corridor, nodes)
 })
+
+test_that("Capping a corridor with unknown method raises an error", {
+  corridor_edge_1 <- sf::st_linestring(cbind(c(-1, 1), c(1, 1)))
+  corridor_edge_2 <- sf::st_linestring(cbind(c(-1, 1), c(-1, -1)))
+  edges <- sf::st_sfc(corridor_edge_1, corridor_edge_2)
+  expect_error(cap_corridor(edges, method = "crisp"),
+               "Unknown method to cap the river corridor: crisp")
+})
+
+test_that("Capping with 'shortest-path' method raises an error if no network
+          is provided", {
+            corridor_edge_1 <- sf::st_linestring(cbind(c(-1, 1), c(1, 1)))
+            corridor_edge_2 <- sf::st_linestring(cbind(c(-1, 1), c(-1, -1)))
+            edges <- sf::st_sfc(corridor_edge_1, corridor_edge_2)
+            expect_error(cap_corridor(edges, method = "shortest-path"),
+                         paste("A network should be provided if",
+                               "`capping_method = 'shortest-path'`"))
+          })

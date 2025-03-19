@@ -12,6 +12,12 @@
 #'
 #' @return Segment polygons as a simple feature geometry
 #' @export
+#' @examples
+#' corridor <- bucharest_delineation$corridor
+#' network <- rbind(bucharest_osm$streets, bucharest_osm$railways) |>
+#'   as_network()
+#' river_centerline <- bucharest_osm$river_centerline
+#' delineate_segments(corridor, network, river_centerline)
 delineate_segments <- function(corridor, network, river_centerline,
                                angle_threshold = 90) {
 
@@ -44,6 +50,7 @@ delineate_segments <- function(corridor, network, river_centerline,
 #'
 #' @return Candidate segment edges as a simple feature geometry
 #' @importFrom rlang .data
+#' @keywords internal
 clip_and_filter <- function(lines, corridor, river_centerline) {
 
   # Split corridor along the river centerline to find edges on the two sides
@@ -88,6 +95,7 @@ clip_and_filter <- function(lines, corridor, river_centerline) {
 #'   to consider as a single river crossing
 #'
 #' @return A simple feature geometry including the shortest edge per cluster
+#' @keywords internal
 filter_clusters <- function(crossings, river, eps = 100) {
   intersections <- sf::st_intersection(crossings, river)
   # By computing centroids we make sure we only have POINT geometries here
@@ -115,6 +123,7 @@ filter_clusters <- function(crossings, river, eps = 100) {
 #' @param corridor The river corridor as a simple feature geometry
 #'
 #' @return Refined corridor segments as a simple feature geometry
+#' @keywords internal
 refine_segments <- function(blocks, river_centerline, corridor) {
 
   # Split corridor along the river centerline to find edges on the two sides
@@ -162,6 +171,7 @@ refine_segments <- function(blocks, river_centerline, corridor) {
 #' @param method Strategy for merging, see [merge_block()]
 #'
 #' @return Blocks merged to the specified ones as a simple feature geometry
+#' @keywords internal
 merge_blocks <- function(blocks, to_merge, method = "longest-intersection") {
   if (length(to_merge) == 0) {
     return(blocks)
@@ -193,6 +203,7 @@ merge_blocks <- function(blocks, to_merge, method = "longest-intersection") {
 #'   it shares the longest intersection with)
 #'
 #' @return Blocks merged to the specified one as a simple feature geometry
+#' @keywords internal
 merge_block <- function(targets, block, method = "longest-intersection") {
   index_adjacent <- find_adjacent(targets, block)
   if (method == "longest-intersection") {

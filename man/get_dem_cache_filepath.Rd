@@ -20,3 +20,4 @@ object representing the DEM as retrieved from a set of tiles reachable at the
 given URLs, cropped and merged for the given bounding box. The directory used
 is the one returned by \code{\link[=cache_directory]{cache_directory()}}.
 }
+\keyword{internal}

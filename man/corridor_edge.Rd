@@ -38,3 +38,4 @@ used as target edge in the following iteration, with the goal of prioritising
 the "straightening" of the edge (some overlap with the excluded area is
 allowed).
 }
+\keyword{internal}

@@ -21,3 +21,8 @@ Object reprojected to specified CRS
 Reproject a raster or vector dataset to the specified
 coordinate reference system (CRS)
 }
+\examples{
+# Reproject a raster to EPSG:4326
+r <- terra::rast(matrix(1:12, nrow = 3, ncol = 4), crs = "EPSG:32633")
+reproject(r, 4326)
+}

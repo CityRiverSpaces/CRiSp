@@ -19,3 +19,4 @@ A simple feature object
 \description{
 Split a geometry along a (multi)linestring.
 }
+\keyword{internal}

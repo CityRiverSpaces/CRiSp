@@ -42,3 +42,9 @@ DEM as a terra SpatRaster object
 \description{
 Access digital elevation model (DEM) for a given region
 }
+\examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+bb <- get_osm_bb("Bucharest")
+get_dem(bb)
+\dontshow{\}) # examplesIf}
+}

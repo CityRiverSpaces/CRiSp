@@ -18,6 +18,17 @@ authors:
     email: f.nattino@esciencecenter.nl
     affiliation: Netherlands eScience Center
     orcid: 'https://orcid.org/0000-0003-3286-0139'
+contributors:
+  - given-names: Fakhereh
+    family-names: Alidoost
+    email: f.alidoost@esciencecenter.nl
+    affiliation: Netherlands eScience Center
+    orcid: 'https://orcid.org/0000-0001-8407-6472'
+  - given-names: Meiert Willem
+    family-names: Grootes
+    email: m.grootes@esciencecenter.nl
+    affiliation: Netherlands eScience Center
+    orcid: 'https://orcid.org/0000-0002-5733-4795'
 repository-code: 'https://github.com/CityRiverSpaces/CRiSp'
 abstract: >-
   The City River Spaces (CRiSp) open-source software

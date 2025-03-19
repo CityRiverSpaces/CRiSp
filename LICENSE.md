@@ -1,3 +1,8 @@
+Technische Universiteit Delft hereby disclaims all copyright interest in the
+program “CRiSp” (Automate the Delineation of Urban River Spaces)
+written by the Author(s).
+Dick van Gameren, Dean of the Faculty of Architecture and the Built Environment
+
 Apache License
 ==============
 
@@ -178,8 +183,8 @@ enclosed in the appropriate comment syntax for the file format. We also
 recommend that a file or class name and description of purpose be included on
 the same “printed page” as the copyright notice for easier identification within
 third-party archives.
-
-    Copyright [yyyy] [name of copyright owner]
+    
+    Copyright 2025 Claudiu Forgaci
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

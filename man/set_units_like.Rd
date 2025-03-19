@@ -17,3 +17,4 @@ Object x with units of y
 \description{
 Set the units of x as the units of y
 }
+\keyword{internal}

@@ -19,3 +19,4 @@ cd raster with river+BUFFER pixels masked
 \description{
 Mask out river regions incl. a buffer in cost distance raster data
 }
+\keyword{internal}

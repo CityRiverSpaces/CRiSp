@@ -16,3 +16,8 @@ different directory can be used by setting the environment variable
 line to the \code{.Renviron} file:
 \verb{CRISP_CACHE_DIRECTORY=/path/to/crisp/cache/dir}.
 }
+\examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+cache_directory()
+\dontshow{\}) # examplesIf}
+}

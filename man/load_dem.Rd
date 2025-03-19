@@ -22,3 +22,10 @@ Load DEM data from a list of tiles, crop and merge using a given bounding
 box to create a raster DEM for the specified region. Results are cached, so
 that new queries with the same input parameters will be loaded from disk.
 }
+\examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+bb <- get_osm_bb("Bucharest")
+tile_urls <- get_stac_asset_urls(bb)
+load_dem(bb, tile_urls)
+\dontshow{\}) # examplesIf}
+}

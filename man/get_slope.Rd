@@ -15,3 +15,4 @@ raster of derived slope over dem extent
 \description{
 This makes use of the terrain function of the terra package
 }
+\keyword{internal}

@@ -54,3 +54,14 @@ The corridor edges on the two river banks are drawn on the provided spatial
 network starting from an initial definition of the corridor (based e.g. on
 the river valley).
 }
+\examples{
+network <- rbind(bucharest_osm$streets, bucharest_osm$railways) |>
+  as_network()
+crs <- get_utm_zone(bucharest_osm$aoi)
+aoi <- reproject(bucharest_osm$aoi, crs)
+delineate_corridor(network,
+                   bucharest_osm$river_centerline,
+                   bucharest_osm$river_surface,
+                   aoi,
+                   dem = terra::unwrap(bucharest_dem))
+}

@@ -3,6 +3,7 @@
 #' @param x x (can be unitless)
 #' @param y y (can be unitless)
 #' @return Object x with units of y
+#' @keywords internal
 set_units_like <- function(x, y) {
   has_units_x <- inherits(x, "units")
   has_units_y <- inherits(y, "units")
@@ -18,8 +19,12 @@ set_units_like <- function(x, y) {
 #' Get the UTM zone of a spatial object
 #'
 #' @param x Bounding box or geometry object
-#' @return The EPSG of the UTM zone
+#' @return The EPSG code of the UTM zone
 #' @export
+#' @examples
+#' # Get EPSG code for UTM zone of Bucharest
+#' bb <- get_osm_bb("Bucharest")
+#' get_utm_zone(bb)
 get_utm_zone <- function(x) {
   bb <- as_bbox(x)
 
@@ -38,6 +43,12 @@ get_utm_zone <- function(x) {
 #'   vector (xmin, ymin, xmax, ymax)
 #' @return A bounding box as returned by [`sf::st_bbox()`]
 #' @export
+#' @examples
+#' library(sf)
+#' bounding_coords <- c(25.9, 44.3, 26.2, 44.5)
+#' bb <- as_bbox(bounding_coords)
+#' class(bb)
+#' st_crs(bb)
 as_bbox <- function(x) {
   if (inherits(x, c("numeric", "matrix"))) {
     x <- as.vector(x)
@@ -60,6 +71,7 @@ as_bbox <- function(x) {
 #' @param buffer_distance Buffer distance in meters
 #' @param ... Optional parameters passed on to [`sf::st_buffer()`]
 #' @return Expanded sf object
+#' @keywords internal
 buffer <- function(obj, buffer_distance, ...) {
   is_obj_longlat <- sf::st_is_longlat(obj)
   dst_crs <- sf::st_crs(obj)
@@ -92,6 +104,7 @@ buffer <- function(obj, buffer_distance, ...) {
 #'   Choose between `NULL` (double-sided), `"right"` and `"left"`
 #'
 #' @return A simple feature geometry
+#' @keywords internal
 river_buffer <- function(river, buffer_distance, bbox = NULL, side = NULL) {
   if (!is.null(bbox)) river <- sf::st_crop(river, bbox)
   if (is.null(side)) {
@@ -124,6 +137,10 @@ river_buffer <- function(river, buffer_distance, bbox = NULL, side = NULL) {
 #'
 #' @return Object reprojected to specified CRS
 #' @export
+#' @examples
+#' # Reproject a raster to EPSG:4326
+#' r <- terra::rast(matrix(1:12, nrow = 3, ncol = 4), crs = "EPSG:32633")
+#' reproject(r, 4326)
 reproject <- function(x, crs, ...) {
   if (inherits(x, "SpatRaster")) {
     # terra::crs does not support a numeric value as CRS, convert to character
@@ -145,6 +162,7 @@ reproject <- function(x, crs, ...) {
 #' @param bbox A bounding box
 #'
 #' @return Raster data as a [`terra::SpatRaster`] object
+#' @keywords internal
 load_raster <- function(urlpaths, bbox = NULL) {
   rasters <- lapply(urlpaths, terra::rast)
   if (!is.null(bbox)) {
@@ -164,6 +182,7 @@ load_raster <- function(urlpaths, bbox = NULL) {
 #' @param river_surface River surface as sfc_POLYGON or sfc_MULTIPOLYGON
 #'
 #' @return Combined river as sfc_MULTILINESTRING
+#' @keywords internal
 combine_river_features <- function(river_centerline, river_surface) {
   if (is.null(river_surface)) {
     warning("Calculating viewpoints along river centerline.")

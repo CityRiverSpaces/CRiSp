@@ -20,3 +20,4 @@ Indices or geometries of the edges intersecting the given geometry
 \description{
 Identify network edges that are intersecting a geometry
 }
+\keyword{internal}

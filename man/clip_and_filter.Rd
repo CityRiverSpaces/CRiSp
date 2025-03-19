@@ -22,3 +22,4 @@ side to side are considered valid segment edges. We group valid segment edges
 that cross the river in nearby locations, and select the shortest line per
 cluster.
 }
+\keyword{internal}

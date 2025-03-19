@@ -6,12 +6,23 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/CityRiverSpaces/CRiSp/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/CityRiverSpaces/CRiSp/actions/workflows/R-CMD-check.yaml)
+[![Project Status: Active – The project has reached a stable, usable
+state and is being actively
+developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 <!-- badges: end -->
 
 CRiSp (City River Spaces) provides tools to automate the morphological
 delineation of riverside urban areas.
 
 ## Installation
+
+You can install the released version of CRiSp from
+[CRAN](https://cran.r-project.org) with:
+
+``` r
+# Install from CRAN
+install.packages("CRiSp")
+```
 
 You can install the development version of CRiSp from
 [GitHub](https://github.com/) with:

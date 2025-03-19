@@ -22,3 +22,4 @@ applied by first transforming the object in a suitable projected CRS,
 expanding it with the given buffer, and then transforming
 it back to the lat/lon system.
 }
+\keyword{internal}

@@ -16,3 +16,4 @@ geometry without holes
 \description{
 Create vector/polygon representation of valley without holes from raster mask
 }
+\keyword{internal}

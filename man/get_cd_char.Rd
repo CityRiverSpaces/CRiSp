@@ -17,3 +17,4 @@ characteristic value of cd raster
 \description{
 Get characteristic value of distribution of cost distance
 }
+\keyword{internal}

@@ -19,3 +19,10 @@ An sf object with the buildings
 \description{
 Get buildings from OpenStreetMap within a given buffer around a river.
 }
+\examples{
+\dontrun{
+bb <- get_osm_bb("Bucharest")
+crs <- get_utm_zone(bb)
+get_osm_buildings(bb, crs)
+}
+}

@@ -81,3 +81,6 @@ A list with the corridor, segments, and riverspace geometries
 \description{
 Delineate a corridor around a river.
 }
+\examples{
+delineate("Bucharest", "Dâmbovița")
+}

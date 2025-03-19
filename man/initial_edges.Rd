@@ -20,3 +20,4 @@ A simple feature geometry representing the initial corridor edges
 These are defined by splitting the initial corridor boundary into the
 sub-regions that the river forms in the area of interest
 }
+\keyword{internal}

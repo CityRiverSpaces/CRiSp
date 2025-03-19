@@ -24,3 +24,4 @@ using a density-based clustering method (DBSCAN). This is to make sure that
 edges representing e.g. different lanes of the same street are treated as
 part of the same crossing. For each cluster, select the shortest edge.
 }
+\keyword{internal}

@@ -21,3 +21,4 @@ The function returns the file path where to serialize an osdata_sf object
 for a given key:value pair and a bounding box. The directory used is the one
 returned by \code{\link[=cache_directory]{cache_directory()}}.
 }
+\keyword{internal}

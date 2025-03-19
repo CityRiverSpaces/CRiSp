@@ -15,3 +15,4 @@ polygon representation of valley area as st_geometry
 \description{
 Create vector/polygon representation of valley raster mask
 }
+\keyword{internal}

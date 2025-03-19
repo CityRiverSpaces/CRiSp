@@ -22,3 +22,4 @@ that need to be merged, and that intersect them via a (Multi)LineString. We
 consider the blocks to merge one by one, from the smallest to the largest,
 merging them to the other blocks recursively.
 }
+\keyword{internal}

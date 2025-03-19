@@ -26,3 +26,4 @@ A simple feature geometry representing the corridor (i.e. a polygon)
 \description{
 Cap the corridor by connecting the edge end points
 }
+\keyword{internal}

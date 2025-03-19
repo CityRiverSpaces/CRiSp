@@ -22,3 +22,4 @@ A simple feature geometry
 \description{
 Find shortest path between a pair of nodes in the network.
 }
+\keyword{internal}

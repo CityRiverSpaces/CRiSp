@@ -31,6 +31,6 @@ Delineate the space surrounding a river
 }
 \examples{
 \dontrun{
-  delineate_riverspace(bucharest_osm$buildings, bucharest_osm$river_surface)
+delineate_riverspace(bucharest_osm$buildings, bucharest_osm$river_surface)
 }
 }

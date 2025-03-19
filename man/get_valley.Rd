@@ -23,3 +23,6 @@ distribution in a region surrounding the river (default: a buffer region of
 The resulting area is then "polygonized" to obtain the valley boundary as a
 simple feature geometry.
 }
+\examples{
+get_valley(terra::unwrap(bucharest_dem), bucharest_osm$river_centerline)
+}

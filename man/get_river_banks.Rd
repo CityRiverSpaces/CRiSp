@@ -10,7 +10,7 @@ get_river_banks(river, width)
 \item{river}{River spatial features provided as a \code{\link[sfnetworks:sfnetwork]{sfnetworks::sfnetwork}}
 or \code{\link[sf:sf]{sf::sf}}/\code{\link[sf:sfc]{sf::sfc}} object.}
 
-\item{width}{(Approximate) width of the regions}
+\item{width}{Width of the regions}
 }
 \value{
 A \code{\link[sf:sfc]{sf::sfc}} object with two polygon features
@@ -19,3 +19,4 @@ A \code{\link[sf:sfc]{sf::sfc}} object with two polygon features
 These are constructed as single-sided buffers around the river geometry (see
 \code{\link[=river_buffer]{river_buffer()}} for the implementation and refinement steps).
 }
+\keyword{internal}

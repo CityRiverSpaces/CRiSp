@@ -18,3 +18,4 @@ A spatial network object
 If subsetting results in multiple disconnected components, we keep the main
 one.
 }
+\keyword{internal}

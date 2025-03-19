@@ -20,3 +20,4 @@ Object deserialized
 \description{
 For the directory used for caching see \code{\link[=cache_directory]{cache_directory()}}.
 }
+\keyword{internal}

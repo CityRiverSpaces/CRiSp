@@ -21,3 +21,4 @@ Blocks merged to the specified one as a simple feature geometry
 \description{
 Merge a block to one of the target geometries
 }
+\keyword{internal}

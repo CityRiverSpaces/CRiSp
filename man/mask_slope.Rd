@@ -23,3 +23,4 @@ updated slope raster
 Mask slope raster, setting the slope to zero for the pixels overlapping
 the river area.
 }
+\keyword{internal}

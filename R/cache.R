@@ -8,6 +8,8 @@
 #'
 #' @return The cache directory used by CRiSp.
 #' @export
+#' @examplesIf interactive()
+#' cache_directory()
 cache_directory <- function() {
   default_dir <- file.path(Sys.getenv("HOME", "."), ".cache", "CRiSp")
   cache_dir <- Sys.getenv("CRISP_CACHE_DIRECTORY", default_dir)
@@ -28,6 +30,7 @@ cache_directory <- function() {
 #' @param bbox A bounding box
 #'
 #' @return A character string representing the file path
+#' @keywords internal
 get_osmdata_cache_filepath <- function(key, value, bbox) {
   # collapse `value` (which might be a vector) to a character string
   value_str <- paste(value, collapse = "_")
@@ -49,12 +52,14 @@ get_osmdata_cache_filepath <- function(key, value, bbox) {
 #' @param bbox A bounding box
 #'
 #' @return A character string representing the file path
+#' @keywords internal
 get_dem_cache_filepath <- function(tile_urls, bbox) {
   # concatenate tile names
-  tile_names <- sapply(
-    tile_urls,
+  tile_names <- vapply(
+    X = tile_urls,
     # get the base name of the tile and strip its extension
-    \(x) sub(pattern = "(.*)\\..*$", replacement = "\\1", basename(x))
+    FUN = \(x) sub(pattern = "(.*)\\..*$", replacement = "\\1", basename(x)),
+    FUN.VALUE = character(1)
   )
   tiles_str <- paste(tile_names, collapse = "_")
 
@@ -87,6 +92,7 @@ get_rds_filename <- function(...) {
 #' @param quiet Omit warning on cache file being loaded
 #'
 #' @return Object deserialized
+#' @keywords internal
 read_data_from_cache <- function(filepath, unwrap = FALSE, quiet = FALSE) {
   if (!quiet) {
     warning(sprintf("Loading data from cache directory: %s", filepath))
@@ -110,6 +116,7 @@ read_data_from_cache <- function(filepath, unwrap = FALSE, quiet = FALSE) {
 #' @param quiet Omit message on cache file being written
 #'
 #' @return `NULL` invisibly
+#' @keywords internal
 write_data_to_cache <- function(x, filepath, wrap = FALSE, quiet = FALSE) {
   if (!quiet) {
     message(sprintf("Saving data to cache directory: %s", filepath))
@@ -129,6 +136,8 @@ write_data_to_cache <- function(x, filepath, wrap = FALSE, quiet = FALSE) {
 #'
 #' @return List of file paths of removed files
 #' @export
+#' @examplesIf interactive()
+#' clear_cache()
 clear_cache <- function(before_date = NULL) {
   cache_dir <- cache_directory()
   files <- list.files(cache_dir, full.names = TRUE)

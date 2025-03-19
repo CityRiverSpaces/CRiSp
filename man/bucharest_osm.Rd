@@ -7,10 +7,10 @@
 \format{
 A list of sf objects representing:
 \describe{
-\item{bb}{The city bounding box.}
 \item{boundary}{The administrative boundary of Bucharest.}
 \item{river_centerline}{The Dâmbovița river centerline.}
 \item{river_surface}{The Dâmbovița river area.}
+\item{aoi}{The area of interest (AOI) for the city of Bucharest.}
 \item{streets}{The street network.}
 \item{railways}{The railway network.}
 \item{buildings}{The buildings in the corridor.}

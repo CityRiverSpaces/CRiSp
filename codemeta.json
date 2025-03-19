@@ -7,7 +7,7 @@
   "codeRepository": "https://github.com/CityRiverSpaces/CRiSp",
   "issueTracker": "https://github.com/CityRiverSpaces/crisp/issues",
   "license": "Apache License 2",
-  "version": "0.0.0.9000",
+  "version": "0.1.0",
   "programmingLanguage": {
     "@type": "ComputerLanguage",
     "name": "R",
@@ -30,6 +30,32 @@
       "@id": "https://orcid.org/0000-0003-3286-0139"
     }
   ],
+  "contributor": [
+    {
+      "@type": "Person",
+      "givenName": "Fakhereh",
+      "familyName": "Alidoost",
+      "email": "f.alidoost@esciencecenter.nl",
+      "@id": "https://orcid.org/0000-0001-8407-6472"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Meiert Willem",
+      "familyName": "Grootes",
+      "email": "m.grootes@esciencecenter.nl",
+      "@id": "https://orcid.org/0000-0002-5733-4795"
+    }
+  ],
+  "copyrightHolder": [
+    {
+      "@type": "Person",
+      "givenName": "Claudiu",
+      "familyName": "Forgaci",
+      "email": "c.forgaci@tudelft.nl",
+      "@id": "https://orcid.org/0000-0003-3218-5102"
+    }
+  ],
+  "copyrightYear": "2025",
   "funder": [
     {
       "@type": "Organization",

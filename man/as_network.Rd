@@ -21,3 +21,11 @@ A spatial network object
 \description{
 Create a network from a collection of line strings.
 }
+\examples{
+edges <- sf::st_sfc(
+  sf::st_linestring(matrix(c(0, 0, 1, 1), ncol = 2, byrow = TRUE)),
+  sf::st_linestring(matrix(c(0, 1, 1, 0), ncol = 2, byrow = TRUE))
+)
+sf::st_crs(edges) <- sf::st_crs("EPSG:4326")
+as_network(edges)
+}

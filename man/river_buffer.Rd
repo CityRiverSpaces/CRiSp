@@ -25,3 +25,4 @@ The river geometry may consist of multiple spatial features, these are
 optionally cropped using the area of interest, then merged after applying the
 buffer.
 }
+\keyword{internal}

@@ -9,7 +9,8 @@ clean_network(network, simplify = TRUE)
 \arguments{
 \item{network}{A network object}
 
-\item{simplify}{Whether}
+\item{simplify}{Whether the network should be simplified with
+\code{\link[=simplify_network]{simplify_network()}}}
 }
 \value{
 A cleaned network object
@@ -19,4 +20,9 @@ Subdivide edges by \href{https://luukvdmeer.github.io/sfnetworks/articles/sfn02_
 (optionally) simplify the network (see \code{\link[=simplify_network]{simplify_network()}}), remove
 \href{https://luukvdmeer.github.io/sfnetworks/articles/sfn02_preprocess_clean.html#smooth-pseudo-nodes}{pseudo-nodes},
 and discard all but the main connected component.
+}
+\examples{
+edges <- dplyr::bind_rows(bucharest_osm$streets, bucharest_osm$railways)
+network <- sfnetworks::as_sfnetwork(edges, directed = FALSE)
+clean_network(network)
 }
