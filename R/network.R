@@ -37,6 +37,7 @@ flatten_network <- function(network) {
 
   # Determine intersection points between crossing edges
   edges_cross <- get_crossing_edges(edges)
+  if (nrow(edges_cross) == 0) return(network)
   points_intersect <- get_intersection_points(edges_cross)
 
   # Add target points to the edge geometries
