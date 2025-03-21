@@ -32,7 +32,7 @@ delineate_corridor <- function(
 ) {
   # Drop all attributes of river centerline and surface but the geometries
   river_centerline <- sf::st_geometry(river_centerline)
-  river_surface <- sf::st_geometry(river_surface)
+  if (!is.null(river_surface)) river_surface <- sf::st_geometry(river_surface)
 
   # Draw the initial corridor geometry within the area of interest
   river <- c(river_centerline, river_surface)
