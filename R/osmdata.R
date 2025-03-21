@@ -237,7 +237,6 @@ get_osm_river <- function(bb, river_name, crs = NULL, force_download = FALSE) {
     sf::st_as_sf() |>
     # natural:water retrieved some invalid polygons, fix these
     sf::st_make_valid() |>
-    sf::st_crop(bb) |>
     sf::st_filter(river_centerline, .predicate = sf::st_intersects) |>
     sf::st_union()
 
