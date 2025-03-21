@@ -117,7 +117,10 @@ delineate <- function(
   }
 
   if (riverspace) {
-    river_combined <- combine_river_features(osm_data$river_centerline,
+    river_centerline_clipped <- sf::st_intersection(
+      osm_data$river_centerline, osm_data$aoi_buildings |> sf::st_transform(crs)
+    )
+    river_combined <- combine_river_features(river_centerline_clipped,
                                              osm_data$river_surface)
     riverspace <- delineate_riverspace(osm_data$buildings,
                                        river_combined)
