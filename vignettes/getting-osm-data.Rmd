@@ -16,19 +16,15 @@ knitr::opts_chunk$set(
   warning = FALSE
 )
 
-library(CRiSp)
+library(CRiSpDelineation)
 library(CRiSpData)
+library(purrr)
 
 city_boundary <- bucharest_osm$boundary
 river_surface <- bucharest_osm$river_surface
 river_centerline <- bucharest_osm$river_centerline
 railways <- bucharest_osm$railways
 streets <- bucharest_osm$streets
-```
-
-```{r packages}
-library(CRiSp)
-library(purrr)
 ```
 
 In this notebook we download OSM data needed for the delineation of the urban river corridor of River Dâmbovița in Bucharest, Romania. We make sure that we include a given area around the city boundaries.
@@ -46,7 +42,7 @@ We start by getting the bounding box for the study area:
 bb <- get_osm_bb(city_name)
 ```
 
-Using the obtained bounding box, we get the different layers of OSM data needed for the delineation of the urban river corridor. We will get the city boundary, the waterways, the street network, and the rail network using built-in functions from the `CRiSp` package.
+Using the obtained bounding box, we get the different layers of OSM data needed for the delineation of the urban river corridor. We will get the city boundary, the waterways, the street network, and the rail network using built-in functions from the `CRiSpDelineation` package.
 
 ```{r}
 city_boundary <- get_osm_city_boundary(city_name, bb, crs)

@@ -3,7 +3,7 @@
 \docType{data}
 \name{bucharest_delineation}
 \alias{bucharest_delineation}
-\title{CRiSp example delineation data for Bucharest}
+\title{CRiSpDelineation example data for Bucharest}
 \format{
 A list of sf objects representing:
 \describe{

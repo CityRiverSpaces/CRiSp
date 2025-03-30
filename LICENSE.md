@@ -1,5 +1,5 @@
 Technische Universiteit Delft hereby disclaims all copyright interest in the
-program “CRiSp” (Automate the Delineation of Urban River Spaces)
+program “CRiSpDelineation” (Automate the Delineation of Urban River Spaces)
 written by the Author(s).
 Dick van Gameren, Dean of the Faculty of Architecture and the Built Environment
 
