@@ -2,7 +2,7 @@
 % Please edit documentation in R/segments.R
 \name{clip_and_filter}
 \alias{clip_and_filter}
-\title{Clip lines to the extent of the corridor, and filter valid segment edges}
+\title{Clip lines to the extent of the corridor, and select valid segment edges}
 \usage{
 clip_and_filter(lines, corridor, river_centerline)
 }
@@ -17,9 +17,11 @@ clip_and_filter(lines, corridor, river_centerline)
 Candidate segment edges as a simple feature geometry
 }
 \description{
-Lines that intersect the river only once and that cross the corridor from
-side to side are considered valid segment edges. We group valid segment edges
-that cross the river in nearby locations, and select the shortest line per
-cluster.
+Lines that intersect the river and that cross the corridor from side to side
+are considered valid segment edges. We group valid segment edges that cross
+the river in nearby locations, and select the shortest line per cluster.
+From these candidate segment edges, we select the ultimate set of
+non-intersecting lines by dropping the longest segments with most
+intersections.
 }
 \keyword{internal}
