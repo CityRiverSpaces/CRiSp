@@ -28,33 +28,11 @@ find_largest <- function(geometry, n = 1) {
   order(area, decreasing = TRUE)[seq_len(n)]
 }
 
-#' Get the index of the n geometries with smallest area
-#' @noRd
-find_smallest <- function(geometry, n = 1) {
-  area <- sf::st_area(geometry)
-  order(area)[seq_len(n)]
-}
-
 #' Get the index of the n geometries with highest length
 #' @noRd
 find_longest <- function(geometry, n = 1) {
   length <- sf::st_length(geometry)
   order(length, decreasing = TRUE)[seq_len(n)]
-}
-
-#' @noRd
-find_adjacent <- function(geometry, target) {
-  index_neighbour <- find_intersects(geometry, target)
-  intersections <- sf::st_intersection(geometry[index_neighbour], target)
-  is_adjacent_intersections <- sf::st_is(intersections,
-                                         c("MULTILINESTRING", "LINESTRING"))
-  index_neighbour[is_adjacent_intersections]
-}
-
-#' @noRd
-find_intersects <- function(geometry, target) {
-  instersects <- sf::st_intersects(geometry, target, sparse = FALSE)
-  which(instersects)
 }
 
 #' Split a geometry along a (multi)linestring.

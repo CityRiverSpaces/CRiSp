@@ -31,23 +31,22 @@ delineate_segments <- function(corridor, network, river_centerline,
   crossing_strokes <- rcoins::stroke(network, from_edge = crossings,
                                      angle_threshold = angle_threshold)
 
-  # Clip strokes and select the ones that could be used as segment boundaries
-  block_edges <- clip_and_filter(crossing_strokes, corridor, river_centerline)
+  # Clip strokes to the corridor extend and select non-intersecting strokes as
+  # segment boundaries
+  segment_edges <- clip_and_filter(crossing_strokes, corridor, river_centerline)
 
-  # Split the corridor into candidate segments ("blocks")
-  blocks <- split_by(corridor, block_edges)
-
-  # Refine the blocks to make sure that all segments touch the river and cross
-  # the corridor from side to side
-  refine_segments(blocks, river_centerline, corridor)
+  # Split the corridor into the segments using the selected boundaries
+  split_by(corridor, segment_edges)
 }
 
-#' Clip lines to the extent of the corridor, and filter valid segment edges
+#' Clip lines to the extent of the corridor, and select valid segment edges
 #'
-#' Lines that intersect the river only once and that cross the corridor from
-#' side to side are considered valid segment edges. We group valid segment edges
-#' that cross the river in nearby locations, and select the shortest line per
-#' cluster.
+#' Lines that intersect the river and that cross the corridor from side to side
+#' are considered valid segment edges. We group valid segment edges that cross
+#' the river in nearby locations, and select the shortest line per cluster.
+#' From these candidate segment edges, we select the ultimate set of
+#' non-intersecting lines by dropping the longest segments with most
+#' intersections.
 #'
 #' @param lines Candidate segment edges as a simple feature geometry
 #' @param corridor The river corridor as a simple feature geometry
@@ -69,21 +68,19 @@ clip_and_filter <- function(lines, corridor, river_centerline) {
     sf::st_filter(river_centerline, .predicate = sf::st_intersects) |>
     sf::st_geometry()
 
-  # Select the fragments that cross the river only once and intersect both
-  # sides of the corridor
-  river_intersections <- sf::st_intersection(lines_clipped, river_centerline)
-  # TODO: we could generalize the following to allow for more complex river
-  # geometries (e.g. for river islands)
-  intersects_river <- sf::st_is(river_intersections, "POINT")
+  # Select the fragments intersecting both sides of the corridor
   intersects_side_1 <- sf::st_intersects(lines_clipped, corridor_edges[[1]],
                                          sparse = FALSE)
   intersects_side_2 <- sf::st_intersects(lines_clipped, corridor_edges[[2]],
                                          sparse = FALSE)
-  is_valid <- intersects_river & intersects_side_1 & intersects_side_2
-  lines_valid <- lines_clipped[is_valid]
+  lines_valid <- lines_clipped[intersects_side_1 & intersects_side_2]
 
   # Cluster valid segment edges and select the shortest line per cluster
-  filter_clusters(lines_valid, river_centerline)
+  lines_shortest <- filter_clusters(lines_valid, river_centerline)
+
+  # Drop intersecting lines, starting from the longest line with most
+  # intersections with other lines
+  select_nonintersecting_lines(lines_shortest, corridor)
 }
 
 #' Split corridor along the river to find edges on the two banks
@@ -133,110 +130,43 @@ filter_clusters <- function(crossings, river, eps = 100) {
     sf::st_geometry()
 }
 
-#' Refine candidate segments via recursive merging
+#' Select non-intersecting line segments
 #'
-#' Recursively merge the candidate segments provided ("blocks"), until they all
-#' intersect the river centerline and both sides of the corridor.
+#' Recursively drop intersecting lines, starting from the line that form most
+#' intersections with other geometries. When multilple lines form the same
+#' number of intersections with other geometries, the longest line is discarded
+#' first. Note that lines are allowed to intersect on the corridor boundary.
 #'
-#' @param blocks Candidate segments as a simple feature geometry
-#' @param river_centerline The river centerline as a simple feature geometry
+#' @param lines Candidate edge segment as a simple feature geometry
 #' @param corridor The river corridor as a simple feature geometry
-#'
-#' @return Refined corridor segments as a simple feature geometry
+#' @return A set of lines that do not intersect within the corridor geometry,
+#'   as a simple feature geometry
 #' @keywords internal
-refine_segments <- function(blocks, river_centerline, corridor) {
-
-  # Split corridor along the river centerline to find edges on the two sides
-  corridor_edges <- get_corridor_edges(corridor, river_centerline)
-
-  # Recursively merge blocks until all blocks intersect the river
-  not_intersect_river <- function(blocks) {
-    index_instersect_river <- find_intersects(blocks, river_centerline)
-    index <- seq_along(blocks)
-    index[!index %in% index_instersect_river]
-  }
-  while (TRUE) {
-    index_not_instersects_river <- not_intersect_river(blocks = blocks)
-    if (length(index_not_instersects_river) == 0) break
-    blocks <- merge_blocks(blocks, index_not_instersects_river,
-                           method = "longest-intersection")
-  }
-
-  # Recursively merge blocks until all blocks intersect both edges
-  not_intersect_both_edges <- function(blocks) {
-    index_intersects_edge_1 <- find_intersects(blocks, corridor_edges[1])
-    index_intersects_edge_2 <- find_intersects(blocks, corridor_edges[2])
-    index <- seq_along(blocks)
-    index[!(index %in% index_intersects_edge_1 &
-              index %in% index_intersects_edge_2)]
-  }
-  while (TRUE) {
-    index_not_intersect_both_edges <- not_intersect_both_edges(blocks)
-    if (length(index_not_intersect_both_edges) == 0) break
-    blocks <- merge_blocks(blocks, index_not_intersect_both_edges,
-                           method = "smallest")
-  }
-  blocks
-}
-
-#' Merge a set of blocks to adjacent ones
-#'
-#' Adjacent blocks are defined as the blocks that are neighbours to the blocks
-#' that need to be merged, and that intersect them via a (Multi)LineString. We
-#' consider the blocks to merge one by one, from the smallest to the largest,
-#' merging them to the other blocks recursively.
-#'
-#' @param blocks Simple feature geometry representing all the blocks
-#' @param to_merge Indices of the blocks to merge
-#' @param method Strategy for merging, see [merge_block()]
-#'
-#' @return Blocks merged to the specified ones as a simple feature geometry
-#' @keywords internal
-merge_blocks <- function(blocks, to_merge, method = "longest-intersection") {
-  if (length(to_merge) == 0) {
-    return(blocks)
-  }
-  # Pick the first block to merge, i.e. the smallest one, and the targets
-  index_smallest <- find_smallest(blocks[to_merge])
-  index_current <- to_merge[index_smallest]
-  current <-  blocks[index_current]
-  targets <- blocks[!seq_along(blocks) %in% index_current]
-  # Keep track of the geometries of the blocks that still need merging: their
-  # position in the list of blocks might change after merging the current one!
-  index_others <- to_merge[!seq_along(to_merge) %in% index_smallest]
-  others <- blocks[index_others]
-  # Merge current block with one of the targets
-  merged <- merge_block(targets, current, method = method)
-  # Determine the new indices of the other blocks that need to be merged
-  is_equal <- sf::st_equals(merged, others, sparse = TRUE)
-  index_others <- which(apply(is_equal, any, MARGIN = 1))
-  # Continue merging other blocks, recursively
-  merge_blocks(blocks = merged, to_merge = index_others, method = method)
-}
-
-#' Merge a block to one of the target geometries
-#'
-#' @param targets Sequence of target blocks as a simple feature geometry
-#' @param block Block to merge as a simple feature geometry
-#' @param method Strategy for merging, choose between "smallest" (merge to
-#'   smallest adjacent block) and "longest-intersection" (merge to block which
-#'   it shares the longest intersection with)
-#'
-#' @return Blocks merged to the specified one as a simple feature geometry
-#' @keywords internal
-merge_block <- function(targets, block, method = "longest-intersection") {
-  index_adjacent <- find_adjacent(targets, block)
-  if (method == "longest-intersection") {
-    intersections <- sf::st_intersection(targets[index_adjacent], block)
-    index_longest_intersection <- find_longest(intersections)
-    index_to_merge <- index_adjacent[index_longest_intersection]
-  } else if (method == "smallest") {
-    index_smallest <- find_smallest(targets[index_adjacent])
-    index_to_merge <- index_adjacent[index_smallest]
+select_nonintersecting_lines <- function(lines, corridor) {
+  # Determine intersections among the lines provided
+  intersections <- sf::st_intersection(sf::st_as_sf(lines))
+  # Drop self-intersections
+  intersections <- intersections[intersections[["n.overlaps"]] > 1, ]
+  # Drop intersections lying on the corridor boundary
+  idx <- unlist(sf::st_contains(sf::st_boundary(corridor), intersections))
+  if (length(idx) > 0) intersections <- intersections[-idx, ]
+  # If we are left with no intersections, return lines. If we still have
+  # intersections, we recursively exclude lines until no intersection is found
+  if (nrow(intersections) == 0) {
+    lines
   } else {
-    stop(sprintf("Method '%s' unknown", method))
+    # Identify the line with maximum number of intersections
+    intersecting_lines <- intersections[["origins"]]
+    num_intersections <- sapply(seq_len(length(lines)),
+                                \(x) sum(unlist(intersecting_lines) == x))
+    max_intersections <- max(num_intersections)
+    idx_line_max_intersections <- which(num_intersections == max_intersections)
+    # Among these, find the longest one
+    idx_line_longest <- find_longest(lines[idx_line_max_intersections])
+    # This is the line that we are going to drop
+    idx_line_to_drop <- idx_line_max_intersections[idx_line_longest]
+    new_lines <- lines[-idx_line_to_drop]
+    # Recursively check for intersections in the remaining lines
+    select_nonintersecting_lines(new_lines, corridor)
   }
-  merged <- sf::st_union(targets[index_to_merge], block)
-  others <- targets[!seq_along(targets) %in% index_to_merge]
-  c(others, merged)
 }
