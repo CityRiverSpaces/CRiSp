@@ -4,12 +4,20 @@
 \alias{get_osm_railways}
 \title{Get OpenStreetMap railways}
 \usage{
-get_osm_railways(aoi, crs = NULL, force_download = FALSE)
+get_osm_railways(
+  aoi,
+  crs = NULL,
+  railway_values = "rail",
+  force_download = FALSE
+)
 }
 \arguments{
 \item{aoi}{Area of interest as sf object or bbox}
 
 \item{crs}{Coordinate reference system as EPSG code}
+
+\item{railway_values}{A character or character vector with the highway values
+to retrieve.}
 
 \item{force_download}{Download data even if cached data is available}
 }

@@ -217,22 +217,23 @@ get_osm_city_boundary <- function(bb, city_name, crs = NULL, multiple = FALSE,
 #' get_osm_river(bb, "Dâmbovița", crs)
 get_osm_river <- function(bb, river_name, crs = NULL, force_download = FALSE) {
   # Get the river centreline
-  river_centerline_all <- osmdata_as_sf("waterway", "", bb,
-                                        force_download = force_download)
+  river_centerline <- osmdata_as_sf("waterway", "", bb,
+                                    force_download = force_download)
 
   # Check that waterway geometries are found within bb
-  if (is.null(river_centerline_all$osm_lines) &&
-        is.null(river_centerline_all$osm_multilines)) {
+  if (is.null(river_centerline$osm_lines) &&
+        is.null(river_centerline$osm_multilines)) {
     stop(sprintf("No waterway geometries found within given bounding box"))
   }
 
-  river_centerline_all <- dplyr::bind_rows(
-    river_centerline_all$osm_lines,
-    river_centerline_all$osm_multilines
-  )
+  river_centerline_lines <- river_centerline$osm_lines
+  if (!is.null(river_centerline$osm_multilines)) {
+    river_centerline_lines <- dplyr::bind_rows(river_centerline_lines,
+                                               river_centerline$osm_multilines)
+  }
 
   # Retrieve river centerline of interest
-  river_centerline <- river_centerline_all |>
+  river_centerline <- river_centerline_lines |>
     # filter using any of the "name" columns (matching different languages)
     match_osm_name(river_name) |>
     check_invalid_geometry() |> # fix invalid geometries, if any
@@ -248,8 +249,13 @@ get_osm_river <- function(bb, river_name, crs = NULL, force_download = FALSE) {
   # Get the river surface
   river_surface <- osmdata_as_sf("natural", "water", bb,
                                  force_download = force_download)
-  river_surface <- dplyr::bind_rows(river_surface$osm_polygons,
-                                    river_surface$osm_multipolygons) |>
+  river_surface_polygons <- river_surface$osm_polygons
+  if (!is.null(river_surface$osm_multipolygons)) {
+    river_surface_polygons <- dplyr::bind_rows(river_surface_polygons,
+                                               river_surface$osm_multipolygons)
+  }
+
+  river_surface <- river_surface_polygons |>
     sf::st_geometry() |>
     check_invalid_geometry() |> # fix invalid geometries, if any
     sf::st_as_sf() |>
@@ -285,14 +291,14 @@ get_osm_streets <- function(aoi, crs = NULL, highway_values = NULL,
                             force_download = FALSE) {
   if (is.null(highway_values)) {
     highway_values <- c("motorway", "trunk", "primary", "secondary", "tertiary")
+    link_values <- vapply(X = highway_values,
+                          FUN = \(x) sprintf("%s_link", x),
+                          FUN.VALUE = character(1),
+                          USE.NAMES = FALSE)
+    highway_values <- c(highway_values, link_values)
   }
 
-  link_values <- vapply(X = highway_values,
-                        FUN = \(x) sprintf("%s_link", x),
-                        FUN.VALUE = character(1),
-                        USE.NAMES = FALSE)
-
-  streets <- osmdata_as_sf("highway", c(highway_values, link_values), aoi,
+  streets <- osmdata_as_sf("highway", highway_values, aoi,
                            force_download = force_download)
 
   # Cast polygons (closed streets) into lines
@@ -321,6 +327,8 @@ get_osm_streets <- function(aoi, crs = NULL, highway_values = NULL,
 #'
 #' @param aoi Area of interest as sf object or bbox
 #' @param crs Coordinate reference system as EPSG code
+#' @param railway_values A character or character vector with the highway values
+#'   to retrieve.
 #' @param force_download Download data even if cached data is available
 #'
 #' @return An sf object with the railways
@@ -331,8 +339,9 @@ get_osm_streets <- function(aoi, crs = NULL, highway_values = NULL,
 #' bb <- get_osm_bb("Bucharest")
 #' crs <- get_utm_zone(bb)
 #' get_osm_railways(bb, crs)
-get_osm_railways <- function(aoi, crs = NULL, force_download = FALSE) {
-  railways <- osmdata_as_sf("railway", "rail", aoi,
+get_osm_railways <- function(aoi, crs = NULL, railway_values = "rail",
+                             force_download = FALSE) {
+  railways <- osmdata_as_sf("railway", railway_values, aoi,
                             force_download = force_download)
   # If no railways are found, return an empty sf object
   if (is.null(railways$osm_lines)) {
