@@ -5,6 +5,7 @@
 #'
 #' @format A list of sf objects representing:
 #' \describe{
+#'  \item{valley}{The valley boundaries of river Dâmbovița.}
 #'  \item{corridor}{The corridor boundaries of river Dâmbovița.}
 #'  \item{segments}{Corridor segments of river Dâmbovița.}
 #'  \item{riverspace}{River space of Dâmbovița.}

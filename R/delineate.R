@@ -27,6 +27,8 @@
 #'   (in degrees) are considered when forming segment edges. See
 #'  [delineate_segments()] and [rcoins::stroke()]. Only used if `segments` is
 #'  TRUE.
+#' @param valley Whether to return the initial valley (only possible if
+#'   `initial_method` is `"valley"`).
 #' @param corridor Whether to carry out the corridor delineation
 #' @param segments Whether to carry out the corridor segmentation
 #' @param riverspace Whether to carry out the riverspace delineation
@@ -43,8 +45,9 @@ delineate <- function(
   city_name, river_name, crs = NULL, network_buffer = NULL,
   buildings_buffer = NULL, dem_buffer = 2500, initial_method = "valley",
   initial_buffer = NULL, dem = NULL, max_iterations = 10,
-  capping_method = "shortest-path", angle_threshold = 100, corridor = TRUE,
-  segments = FALSE, riverspace = FALSE, force_download = FALSE, ...
+  capping_method = "shortest-path", angle_threshold = 100, valley = FALSE,
+  corridor = TRUE, segments = FALSE, riverspace = FALSE,
+  force_download = FALSE, ...
 ) {
 
   if (segments && !corridor) stop("Segmentation requires corridor delineation.")
@@ -79,10 +82,22 @@ delineate <- function(
   # If not provided, determine the CRS
   if (is.null(crs)) crs <- get_utm_zone(osm_data$bb)
 
+  if (valley) {
+    if (initial_method == "valley") {
+      if (is.null(dem)) {
+        aoi_dem <- buffer(osm_data$aoi_network, dem_buffer)
+        dem <- get_dem(aoi_dem, crs = crs, force_download = force_download, ...)
+      }
+      valley <- delineate_valley(dem, osm_data$river_centerline)
+    } else {
+      stop('The valley can only be returned if `initial_method` is `"valley"`')
+    }
+  }
+
   if (corridor) {
     # If using the valley method, and the DEM is not provided, retrieve dataset
     # on a larger aoi to limit edge effects while determining the valley
-    if (initial_method == "valley" && is.null(dem)) {
+    if (initial_method == "valley" && is.null(dem) && valley == FALSE) {
       aoi_dem <- buffer(osm_data$aoi_network, dem_buffer)
       dem <- get_dem(aoi_dem, crs = crs, force_download = force_download, ...)
     }
@@ -124,5 +139,8 @@ delineate <- function(
     riverspace <- NULL
   }
 
-  list(corridor = corridor, segments = segments, riverspace = riverspace)
+  list(valley = valley,
+       corridor = corridor,
+       segments = segments,
+       riverspace = riverspace)
 }

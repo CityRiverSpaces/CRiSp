@@ -17,6 +17,7 @@ delineate(
   max_iterations = 10,
   capping_method = "shortest-path",
   angle_threshold = 100,
+  valley = FALSE,
   corridor = TRUE,
   segments = FALSE,
   riverspace = FALSE,
@@ -62,6 +63,9 @@ the available methods}
 (in degrees) are considered when forming segment edges. See
 \code{\link[=delineate_segments]{delineate_segments()}} and \code{\link[rcoins:stroke]{rcoins::stroke()}}. Only used if \code{segments} is
 TRUE.}
+
+\item{valley}{Whether to return the initial valley (only possible if
+\code{initial_method} is \code{"valley"}).}
 
 \item{corridor}{Whether to carry out the corridor delineation}
 
