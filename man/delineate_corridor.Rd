@@ -7,10 +7,8 @@
 delineate_corridor(
   network,
   river,
+  corridor_init = 1000,
   max_width = 3000,
-  initial_method = "valley",
-  buffer = NULL,
-  dem = NULL,
   max_iterations = 10,
   capping_method = "shortest-path"
 )
@@ -21,17 +19,16 @@ delineate_corridor(
 \item{river}{A (MULTI)LINESTRING simple feature geometry representing the
 river centerline}
 
+\item{corridor_init}{How to estimate the initial guess of the river corridor.
+It can take the following values:
+\itemize{
+\item numeric or integer: use a buffer region of the given size (in meters)
+around the river centerline
+\item An \code{\link[sf:sf]{sf::sf}} or \code{\link[sf:sfc]{sf::sfc}} object: use the given input geometry
+}}
+
 \item{max_width}{(Approximate) maximum width of the corridor. The spatial
 network is trimmed by a buffer region of this size around the river}
-
-\item{initial_method}{The method employed to define the initial river
-corridor geometry. See \code{\link[=initial_corridor]{initial_corridor()}} for the available methods}
-
-\item{buffer}{Initial width of the corridor (only used if \code{initial_method}
-is \code{"buffer"})}
-
-\item{dem}{Digital elevation model (DEM) of the region (only used if
-\code{initial_method} is \code{"valley"}) as a \code{\link[terra:SpatRaster-class]{terra::SpatRaster}} object}
 
 \item{max_iterations}{Maximum number of iterations employed to refine the
 corridor edges (see \code{\link[=corridor_edge]{corridor_edge()}}).}
@@ -51,11 +48,8 @@ river valley).
 \examples{
 \dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 bucharest_osm <- get_osm_example_data()
-bucharest_dem <- get_dem_example_data()
 network <- rbind(bucharest_osm$streets, bucharest_osm$railways) |>
   as_network()
-delineate_corridor(network,
-                   bucharest_osm$river_centerline,
-                   dem = bucharest_dem)
+delineate_corridor(network, bucharest_osm$river_centerline)
 \dontshow{\}) # examplesIf}
 }

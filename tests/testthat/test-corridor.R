@@ -1,25 +1,3 @@
-test_that("proper parameters must be provided depending on selected method", {
-  river <- bucharest_osm$river_centerline
-
-  # for "buffer" method, we need the "buffer" parameter
-  expect_error(initial_corridor(river, method = "buffer"),
-               "Buffer should be provided if `method` is `'buffer'`")
-  with_mocked_bindings(river_buffer = function(...) NULL, {
-    expect_no_error(initial_corridor(river, method = "buffer", buffer = 42))
-  })
-
-  # for "valley" method, we need the "dem" parameter
-  expect_error(initial_corridor(river, method = "valley"),
-               "DEM should be provided if `method` is `'valley'`")
-  with_mocked_bindings(delineate_valley = function(...) NULL, {
-    expect_no_error(initial_corridor(river, method = "valley", dem = 42))
-  })
-
-  # inexistent method raise an error
-  expect_error(initial_corridor(river, method = "crisp"),
-               "Unknown method to initialize river corridor: crisp")
-})
-
 test_that("Build river network works with multiple linestring features", {
   river <- sf::st_sfc(sf::st_linestring(cbind(c(-2, 0, 0), c(0, 0, -2))))
   river_network <- build_river_network(river)

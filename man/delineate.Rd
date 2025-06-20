@@ -10,14 +10,12 @@ delineate(
   crs = NULL,
   network_buffer = NULL,
   buildings_buffer = NULL,
-  dem_buffer = 2500,
-  initial_method = "valley",
-  initial_buffer = NULL,
+  corridor_init = "valley",
   dem = NULL,
+  dem_buffer = 2500,
   max_iterations = 10,
   capping_method = "shortest-path",
   angle_threshold = 100,
-  valley = FALSE,
   corridor = TRUE,
   segments = FALSE,
   riverspace = FALSE,
@@ -40,17 +38,22 @@ Default is 3000 m.}
 \item{buildings_buffer}{Add a buffer (an integer in meters) around the
 river to retrieve additional data (buildings). Default is 100 m.}
 
-\item{dem_buffer}{Add a buffer (an integer in meters) around the
-river to retrieve the DEM.}
-
-\item{initial_method}{The method employed to define the initial river
-corridor geometry. See \code{\link[=initial_corridor]{initial_corridor()}} for the available methods}
-
-\item{initial_buffer}{Buffer region to add to the river geometry to setup the
-initial corridor (only used if \code{initial_method} is \code{"buffer"})}
+\item{corridor_init}{How to estimate the initial guess of the river corridor.
+It can take the following values:
+\itemize{
+\item "valley": use the river valley boundary, as estimated from a Digital
+Elevation Model (DEM) (for more info see \code{\link[=delineate_valley]{delineate_valley()}})
+\item numeric or integer: use a buffer region of the given size (in meters)
+around the river centerline
+\item An \code{\link[sf:sf]{sf::sf}} or \code{\link[sf:sfc]{sf::sfc}} object: use the given input geometry
+}}
 
 \item{dem}{Digital elevation model (DEM) of the region (only used if
-\code{initial_method} is \code{"valley"})}
+\code{corridor_init} is \code{"valley"})}
+
+\item{dem_buffer}{Size of the buffer region (in meters) around the
+river to retrieve the DEM  (only used if \code{corridor_init} is \code{"valley"} and
+\code{dem} is NULL).}
 
 \item{max_iterations}{Maximum number of iterations employed to refine the
 corridor edges (see \code{\link[=corridor_edge]{corridor_edge()}}).}
@@ -64,9 +67,6 @@ the available methods}
 \code{\link[=delineate_segments]{delineate_segments()}} and \code{\link[rcoins:stroke]{rcoins::stroke()}}. Only used if \code{segments} is
 TRUE.}
 
-\item{valley}{Whether to return the initial valley (only possible if
-\code{initial_method} is \code{"valley"}).}
-
 \item{corridor}{Whether to carry out the corridor delineation}
 
 \item{segments}{Whether to carry out the corridor segmentation}
@@ -76,7 +76,7 @@ TRUE.}
 \item{force_download}{Download data even if cached data is available}
 
 \item{...}{Additional (optional) input arguments for retrieving the DEM
-dataset (see \code{\link[=get_dem]{get_dem()}}). Only relevant if \code{initial_method} is \code{"valley"}
+dataset (see \code{\link[=get_dem]{get_dem()}}). Only relevant if \code{corridor_init} is \code{"valley"}
 and \code{dem} is NULL}
 }
 \value{

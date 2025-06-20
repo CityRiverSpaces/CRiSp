@@ -7,14 +7,13 @@
 #' @param network The spatial network to be used for the delineation
 #' @param river A (MULTI)LINESTRING simple feature geometry representing the
 #'   river centerline
+#' @param corridor_init How to estimate the initial guess of the river corridor.
+#'   It can take the following values:
+#'   * numeric or integer: use a buffer region of the given size (in meters)
+#'     around the river centerline
+#'   * An [`sf::sf`] or [`sf::sfc`] object: use the given input geometry
 #' @param max_width (Approximate) maximum width of the corridor. The spatial
 #'   network is trimmed by a buffer region of this size around the river
-#' @param initial_method The method employed to define the initial river
-#'   corridor geometry. See [initial_corridor()] for the available methods
-#' @param buffer Initial width of the corridor (only used if `initial_method`
-#'   is `"buffer"`)
-#' @param dem Digital elevation model (DEM) of the region (only used if
-#'   `initial_method` is `"valley"`) as a [`terra::SpatRaster`] object
 #' @param max_iterations Maximum number of iterations employed to refine the
 #'   corridor edges (see [`corridor_edge()`]).
 #' @param capping_method The method employed to connect the corridor edge end
@@ -25,22 +24,20 @@
 #' @export
 #' @examplesIf interactive()
 #' bucharest_osm <- get_osm_example_data()
-#' bucharest_dem <- get_dem_example_data()
 #' network <- rbind(bucharest_osm$streets, bucharest_osm$railways) |>
 #'   as_network()
-#' delineate_corridor(network,
-#'                    bucharest_osm$river_centerline,
-#'                    dem = bucharest_dem)
+#' delineate_corridor(network, bucharest_osm$river_centerline)
 delineate_corridor <- function(
-  network, river, max_width = 3000, initial_method = "valley", buffer = NULL,
-  dem = NULL, max_iterations = 10, capping_method = "shortest-path"
+  network, river, corridor_init = 1000, max_width = 3000, max_iterations = 10,
+  capping_method = "shortest-path"
 ) {
   # Drop all attributes of river but its geometry
   river <- sf::st_geometry(river)
 
-  # Draw the initial corridor geometry
-  corridor_init <- initial_corridor(river, method = initial_method,
-                                    buffer = buffer, dem = dem)
+  # If an initial corridor is not given, draw a buffer region around the river
+  if (inherits(corridor_init, c("numeric", "integer"))) {
+    corridor_init <- river_buffer(river, corridor_init)
+  }
 
   # Build river network in the area covered by the spatial network
   river_network <- build_river_network(river, bbox = sf::st_bbox(network))
@@ -69,42 +66,6 @@ delineate_corridor <- function(
 
   # Cap the corritor
   cap_corridor(c(edge_1, edge_2), capping_method, network)
-}
-
-#' Draw the initial geometry of a river corridor.
-#'
-#' @param river A simple feature geometry representing the river
-#' @param method The method employed to draw the initial river corridor:
-#'   - "buffer": add a fixed buffer region to the river geometry (see
-#'     [river_buffer()])
-#'   - "valley" (default): use the river valley boundary, as estimated from the
-#'     provided digital elevation model (DEM, see [delineate_valley()] for
-#'     details on the implementation)
-#' @param buffer Buffer region to add to the river geometry (only used if
-#'   `initial_method` is `"buffer"`)
-#' @param dem Digital elevation model (DEM) of the region (only used if
-#'   `initial_method` is `"valley"`)
-#'
-#' @return A simple feature geometry
-#' @keywords internal
-initial_corridor <- function(
-  river, method = "valley", buffer = NULL, dem = NULL
-) {
-  if (method == "buffer") {
-    if (is.null(buffer)) {
-      stop("Buffer should be provided if `method` is `'buffer'`")
-    }
-    river_buffer(river, buffer)
-  } else if (method == "valley") {
-    if (is.null(dem)) {
-      stop("DEM should be provided if `method` is `'valley'`")
-    }
-    delineate_valley(dem, river)
-  } else {
-    stop(
-      sprintf("Unknown method to initialize river corridor: %s", method)
-    )
-  }
 }
 
 #' Build a spatial network from river centerlines

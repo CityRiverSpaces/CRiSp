@@ -9,15 +9,18 @@
 #'   Default is 3000 m.
 #' @param buildings_buffer Add a buffer (an integer in meters) around the
 #'   river to retrieve additional data (buildings). Default is 100 m.
-#' @param dem_buffer Add a buffer (an integer in meters) for retrieving the DEM.
-#' @param initial_method The method employed to define the initial river
-#'   corridor geometry. See [initial_corridor()] for the available methods
-#' @param dem_buffer Add a buffer (an integer in meters) around the
-#'   river to retrieve the DEM.
-#' @param initial_buffer Buffer region to add to the river geometry to setup the
-#'   initial corridor (only used if `initial_method` is `"buffer"`)
+#' @param corridor_init How to estimate the initial guess of the river corridor.
+#'   It can take the following values:
+#'   * "valley": use the river valley boundary, as estimated from a Digital
+#'     Elevation Model (DEM) (for more info see [delineate_valley()])
+#'   * numeric or integer: use a buffer region of the given size (in meters)
+#'     around the river centerline
+#'   * An [`sf::sf`] or [`sf::sfc`] object: use the given input geometry
 #' @param dem Digital elevation model (DEM) of the region (only used if
-#'   `initial_method` is `"valley"`)
+#'   `corridor_init` is `"valley"`)
+#' @param dem_buffer Size of the buffer region (in meters) around the
+#'   river to retrieve the DEM  (only used if `corridor_init` is `"valley"` and
+#'   `dem` is NULL).
 #' @param max_iterations Maximum number of iterations employed to refine the
 #'   corridor edges (see [`corridor_edge()`]).
 #' @param capping_method The method employed to connect the corridor edge end
@@ -27,14 +30,12 @@
 #'   (in degrees) are considered when forming segment edges. See
 #'  [delineate_segments()] and [rcoins::stroke()]. Only used if `segments` is
 #'  TRUE.
-#' @param valley Whether to return the initial valley (only possible if
-#'   `initial_method` is `"valley"`).
 #' @param corridor Whether to carry out the corridor delineation
 #' @param segments Whether to carry out the corridor segmentation
 #' @param riverspace Whether to carry out the riverspace delineation
 #' @param force_download Download data even if cached data is available
 #' @param ... Additional (optional) input arguments for retrieving the DEM
-#'   dataset (see [get_dem()]). Only relevant if `initial_method` is `"valley"`
+#'   dataset (see [get_dem()]). Only relevant if `corridor_init` is `"valley"`
 #'   and `dem` is NULL
 #'
 #' @return A list with the corridor, segments, and riverspace geometries
@@ -43,12 +44,13 @@
 #' delineate("Bucharest", "Dâmbovița")
 delineate <- function(
   city_name, river_name, crs = NULL, network_buffer = NULL,
-  buildings_buffer = NULL, dem_buffer = 2500, initial_method = "valley",
-  initial_buffer = NULL, dem = NULL, max_iterations = 10,
-  capping_method = "shortest-path", angle_threshold = 100, valley = FALSE,
-  corridor = TRUE, segments = FALSE, riverspace = FALSE,
-  force_download = FALSE, ...
+  buildings_buffer = NULL, corridor_init = "valley", dem = NULL,
+  dem_buffer = 2500, max_iterations = 10, capping_method = "shortest-path",
+  angle_threshold = 100, corridor = TRUE, segments = FALSE,
+  riverspace = FALSE, force_download = FALSE, ...
 ) {
+
+  delineations <- list()
 
   if (segments && !corridor) stop("Segmentation requires corridor delineation.")
 
@@ -82,24 +84,16 @@ delineate <- function(
   # If not provided, determine the CRS
   if (is.null(crs)) crs <- get_utm_zone(osm_data$bb)
 
-  if (valley) {
-    if (initial_method == "valley") {
+  if (corridor) {
+    # If using the valley method, and the DEM is not provided, retrieve dataset
+    # on a larger aoi to limit edge effects while determining the valley
+    if (corridor_init == "valley") {
       if (is.null(dem)) {
         aoi_dem <- buffer(osm_data$aoi_network, dem_buffer)
         dem <- get_dem(aoi_dem, crs = crs, force_download = force_download, ...)
       }
-      valley <- delineate_valley(dem, osm_data$river_centerline)
-    } else {
-      stop('The valley can only be returned if `initial_method` is `"valley"`')
-    }
-  }
-
-  if (corridor) {
-    # If using the valley method, and the DEM is not provided, retrieve dataset
-    # on a larger aoi to limit edge effects while determining the valley
-    if (initial_method == "valley" && is.null(dem) && valley == FALSE) {
-      aoi_dem <- buffer(osm_data$aoi_network, dem_buffer)
-      dem <- get_dem(aoi_dem, crs = crs, force_download = force_download, ...)
+      corridor_init <- delineate_valley(dem, osm_data$river_centerline)
+      delineations$valley <- corridor_init
     }
 
     # Set up the combined street and rail network for the delineation
@@ -107,25 +101,23 @@ delineate <- function(
     network <- as_network(network_edges)
 
     # Run the corridor delineation on the spatial network
-    corridor <- delineate_corridor(
+    delineations$corridor <- delineate_corridor(
       network, osm_data$river_centerline, max_width = network_buffer,
-      initial_method = initial_method, buffer = initial_buffer, dem = dem,
-      max_iterations = max_iterations, capping_method = capping_method
+      corridor_init = corridor_init, max_iterations = max_iterations,
+      capping_method = capping_method
     )
-  } else {
-    corridor <- NULL
   }
 
   if (segments) {
     # Select the relevant part of the network
     buffer_corridor <- 100  # TODO should this be an additional input parameter?
-    corridor_buffer <- sf::st_buffer(corridor, buffer_corridor)
+    corridor_buffer <- sf::st_buffer(delineations$corridor, buffer_corridor)
     network_filtered <- filter_network(network, corridor_buffer)
 
-    segments <- delineate_segments(corridor, network_filtered,
-                                   osm_data$river_centerline, angle_threshold)
-  } else {
-    segments <- NULL
+    delineations$segments <- delineate_segments(delineations$corridor,
+                                                network_filtered,
+                                                osm_data$river_centerline,
+                                                angle_threshold)
   }
 
   if (riverspace) {
@@ -134,13 +126,9 @@ delineate <- function(
     )
     river_combined <- combine_river_features(river_centerline_clipped,
                                              osm_data$river_surface)
-    riverspace <- delineate_riverspace(river_combined, osm_data$buildings)
-  } else {
-    riverspace <- NULL
+    delineations$riverspace <- delineate_riverspace(river_combined,
+                                                    osm_data$buildings)
   }
 
-  list(valley = valley,
-       corridor = corridor,
-       segments = segments,
-       riverspace = riverspace)
+  delineations
 }
